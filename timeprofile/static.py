@@ -1,7 +1,8 @@
 """timeprofile.static
 
 In this simple, static time-profiling model, no environmental conditions
-(such as reltative humidity) are considered"""
+(such as reltative humidity) are considered.
+"""
 
 __author__      = "Joel Dubowy"
 __copyright__   = "Copyright 2014, AirFire, PNW, USFS"

@@ -9,8 +9,7 @@ from py.test import raises
 from timeprofile.static import StaticTimeProfiler
 
 
-
-class TestStaticTimeProfiler:
+class TestStaticTimeProfiler(object):
 
     def test_validate(self):
         pass
