@@ -90,8 +90,41 @@ class TestStaticTimeProfiler(object):
         expected = 2* map(lambda x: x / 2, self.DAILY_HOURLY_FRACTIONS)
         assert_arrays_are_approximately_equal(r, expected)
 
-    def test_compute_hourly_fractions_two_days(self):
+    def test_compute_hourly_fractions_partial_days(self):
         s = datetime.datetime(2015, 1, 1, 12, 20)
         e = datetime.datetime(2015, 1, 2, 16, 40)
         r = StaticTimeProfiler()._compute_hourly_fractions(s, e)
+        # TODO: This is what is returned; verify manually that it is correct,
+        # and if so, use it in an assert
+        # [
+        #     0.0,
+        #     0.06411078343377354,
+        #     0.08334401846390559,
+        #     0.10257725349403765,
+        #     0.108988331837415,
+        #     0.07693294012052823,
+        #     0.04487754840364148,
+        #     0.025644313373509413,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.0036543146557250915,
+        #     0.012822156686754706,
+        #     0.025644313373509413,
+        #     0.04487754840364148,
+        #     0.06411078343377354,
+        #     0.08334401846390559,
+        #     0.10257725349403765,
+        #     0.108988331837415
+        # ]
         # TODO: add assert
