@@ -14,12 +14,12 @@ from nested_dict import nested_dict
 
 __all__ = [
     'StaticTimeProfiler',
-    'InvalidDailyHourlyFractionsError',
+    'InvalidHourlyFractionsError',
     'InvalidStartEndTimesError',
     'InvalidEmissionsDataError'
 ]
 
-class InvalidDailyHourlyFractionsError(ValueError):
+class InvalidHourlyFractionsError(ValueError):
     pass
 
 class InvalidStartEndTimesError(ValueError):
@@ -61,25 +61,19 @@ class StaticTimeProfiler(object):
     """DEFAULT_DAILY_HOURLY_FRACTIONS will return the same hourly fractions
     for 'flaming', 'smoldering' and 'residual'"""
 
-    def __init__(self, local_start_time, local_end_time, daily_hourly_fractions=None): #, **options):
+    def __init__(self, local_start_time, local_end_time, hourly_fractions=None): #, **options):
         """StaticTimeProfiler constructor
 
         kwargs:
-         - daily_hourly_fractions - custom hourly fraction of daily emissions
+         - hourly_fractions - custom hourly fractions of emissions; can be
+           specified for all hours from start to end times, or for a single 24
+           hour day, to be repeated to fill the given time window.
         """
-        self._validate_daily_hourly_fractions
-        self.daily_hourly_fractions = (daily_hourly_fractions or
-            self.DEFAULT_DAILY_HOURLY_FRACTIONS)
-
-        self._validate_start_end_times(local_start_time, local_end_time)
-        self.local_start_time = local_start_time
-        self.local_end_time = local_end_time
         self.hourly_fractions = self._compute_hourly_fractions(
-            local_start_time, local_end_time)
+            local_start_time, local_end_time, hourly_fractions)
 
     def profile(self, emissions):
-        """
-
+        """Computes the time profile emissions
         """
         self._validate_emissions(emissions, local_start_time, local_end_time)
 
@@ -93,24 +87,19 @@ class StaticTimeProfiler(object):
                         tpe[category][phase][species].append(e)
         return tpe.to_dict()
 
-    def _validate_daily_hourly_fractions(self, daily_hourly_fractions):
-        """Raises an InvalidDailyHourlyFractionsError exception if validation
+    def _validate_hourly_fractions(self, num_hours, hourly_fractions):
+        """Raises an InvalidHourlyFractionsError exception if validation
         fails.
         """
-        if daily_hourly_fractions:
+        if hourly_fractions:
             for k in self.PHASES:
-                if (len(daily_hourly_fractions.get(k, [])) != 24 or
-                        abs(1 - sum(daily_hourly_fractions[k])) > 0.001):
-                    raise InvalidDailyHourlyFractionsError(
-                        "There must be 24 hourly fractions that sum to 1.00"
-                        " for '{}' phases".format(', '.join(self.PHASES)))
+                if (len(hourly_fractions.get(k, [])) not in (24, num_hours) or
+                        abs(1 - sum(hourly_fractions[k])) > 0.001):
+                    raise InvalidHourlyFractionsError(
+                        "There must be 24 or {} hourly fractions that sum to 1.00"
+                        " for each of the '{}' phases".format(
+                        num_hours, ', '.join(self.PHASES)))
 
-
-    def _validate_start_end_times(self, local_start_time, local_end_time):
-        if local_start_time > local_end_time:
-            raise InvalidEmissionsDataError(
-                "The fire's start time, {}, is later than its end time, {}".format(
-                local_start_time.isoformat(), local_end_time.isoformat()))
 
     def _validate_emissions(self, emissions):
         # TODO: check emissions data
@@ -129,6 +118,11 @@ class StaticTimeProfiler(object):
          - local_start_time --
          - local_end_time --
         """
+        if local_start_time > local_end_time:
+            raise InvalidEmissionsDataError(
+                "The fire's start time, {}, is later than its end time, {}".format(
+                local_start_time.isoformat(), local_end_time.isoformat()))
+
         first_hour_offset = datetime.timedelta(
             minutes=local_start_time.minute, seconds=local_start_time.second)
         start_hour = local_start_time - first_hour_offset
@@ -142,21 +136,28 @@ class StaticTimeProfiler(object):
                 minutes=local_end_time.minute, seconds=local_end_time.second)
             end_hour = local_end_time - first_hour_offset
 
+        hourly_fractions = hourly_fractions or self.DEFAULT_DAILY_HOURLY_FRACTIONS
+        num_hours = (end_our - start_hour).hours + 1
+        self.validate_hourly_fractions(num_hours, hourly_fractions)
+
         # TODO: if more efficient, iterate by phase within the while loop
-        hourly_fractions = {}
+        new_hourly_fractions = {}
         for p in self.PHASES:
             r = []
+            i = 0
             d = start_hour
             while d <= end_hour:
-                f = self.daily_hourly_fractions[d.hour]
+                idx = d.hour if num_hours == 24 else i
+                f = hourly_fractions[idx]
                 if d == start_hour:
                     f *= (3600 - first_hour_offset.seconds) / 3600
                 elif d == end_hour:
                     f *= last_hour_offset.seconds / 3600
                 r.append(f)
                 d += self.ONE_HOUR
+                i += 1
 
             # Normalize so that it all adds up to 1.0
             total = reduce(lambda x, y: x + y, r)
             hourly_fractions[p] = map(lambda x: x / total, r)
-        return p
+        return new_hourly_fractions
