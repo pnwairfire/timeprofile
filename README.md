@@ -4,6 +4,8 @@ This package provides a module for time profiling emissions output.
 
 ## Development
 
+### Clone Repo
+
 Via ssh:
 
     git clone git@github.com:pnwairfire/timeprofile.git
@@ -46,15 +48,14 @@ See [pytest](http://pytest.org/latest/getting-started.html#getstarted) for more 
 
 TODO: ...Fill In...
 
-<!--
-
 First, install pip (with sudo if necessary):
 
     apt-get install python-pip
+    pip install --upgrade pip
 
-Then, to install, for example, v0.3.1, use the following (with sudo if necessary):
+Then, to install, for example, v0.1.0, use the following (with sudo if necessary):
 
-    pip install --trusted-host pypi.smoke.airfire.org -i http://pypi.smoke.airfire.org/simple timeprofile==v0.3.1
+    pip install --trusted-host pypi.smoke.airfire.org -i http://pypi.smoke.airfire.org/simple timeprofile==v0.1.0
 
 If you get an error like
 
@@ -63,7 +64,6 @@ If you get an error like
 it means you need in upgrade pip.  One way to do so is with the following:
 
     pip install --upgrade pip
--->
 
 ## Usage
 
