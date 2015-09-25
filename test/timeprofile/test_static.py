@@ -12,6 +12,20 @@ from timeprofile.static import (
     InvalidStartEndTimesError
 )
 
+def assert_approximately_equal(expected, actual):
+    if isinstance(expected, dict) and isinstance(actual, dict):
+        assert set(expected.keys()) == set(actual.keys())
+        for k in expected:
+            assert_approximately_equal(expected[k], actual[k])
+    elif isinstance(expected, list) and isinstance(actual, list):
+        assert len(expected) == len(actual)
+        for i in xrange(len(expected)):
+            assert_approximately_equal(expected[i], actual[i])
+    elif isinstance(expected, float) and isinstance(actual, float):
+        assert_approx_equal(actual, expected, significant=8)  # arbitrarily chose 8
+    else:
+        assert expected == actual
+
 # def assert_approximately_equal(expected, actual):
 #     # categories
 
@@ -48,11 +62,6 @@ from timeprofile.static import (
 #                                 significant=8  # arbitrarily chose 8
 #                             )
 
-def assert_arrays_are_approximately_equal(a, b):
-    assert len(a) == len(b)
-    for i in xrange(len(a)):
-        assert_approx_equal(a[i], b[i], significant=3)# 8)  # arbitrarily chose 8
-
 class TestStaticTimeProfiler_ValidationMethods(object):
 
     def _dummy_profiler(self, monkeypatch):
@@ -83,23 +92,27 @@ class TestStaticTimeProfiler_DefaultHourlyFractions(object):
         r = StaticTimeProfiler(s, e)
         assert set(r.PHASES) == set(r.hourly_fractions.keys())
         for p in r.PHASES:
-            # TODO: add asserts
-            pass
+            assert_approximately_equal(r.DEFAULT_DAILY_HOURLY_FRACTIONS[p], r.hourly_fractions[p])
 
-        # Now, test comupdation of profiled emissions
+        # Now, test computation of profiled emissions
         # TODO: ....
 
     def test_two_days(self):
         # First make sure daily fractions are computed correctly
-        # TODO: ...
-        # Now, test comupdation of profiled emissions
+        s = datetime.datetime(2015, 1, 1, 0)
+        e = datetime.datetime(2015, 1, 2, 0)
+        r = StaticTimeProfiler(s, e)
+        assert set(r.PHASES) == set(r.hourly_fractions.keys())
+        for p in r.PHASES:
+            assert_approximately_equal(r.DEFAULT_DAILY_HOURLY_FRACTIONS[p], r.hourly_fractions[p])
+
+        # Now, test computation of profiled emissions
         # TODO: ....
-        pass
 
     def test_partial_days(self):
         # First make sure daily fractions are computed correctly
         # TODO: ...
-        # Now, test comupdation of profiled emissions
+        # Now, test computation of profiled emissions
         # TODO: ...
         pass
 
@@ -133,15 +146,14 @@ class TestStaticTimeProfiler_CustomDailyHourlyFractions(object):
         r = StaticTimeProfiler(s, e)
         assert set(r.PHASES) == set(r.hourly_fractions.keys())
         for p in r.PHASES:
-            # TODO: add asserts
-            pass
+            assert_approximately_equal(self.DAILY_HOURLY_FRACTIONS[p], r.hourly_fractions[p])
 
-        # assert_arrays_are_approximately_equal(r.hourly_fractions,
+        # assert_approximately_equal(r.hourly_fractions,
         #     StaticTimeProfiler.DEFAULT_DAILY_HOURLY_FRACTIONS)
 
         # stp = StaticTimeProfiler(self.DAILY_HOURLY_FRACTIONS)
         # r = stp._compute_hourly_fractions(s, e)
-        # assert_arrays_are_approximately_equal(r,
+        # assert_approximately_equal(r,
         #     self.DAILY_HOURLY_FRACTIONS)
 
     def test_two_days(self):
@@ -150,12 +162,12 @@ class TestStaticTimeProfiler_CustomDailyHourlyFractions(object):
         # r = StaticTimeProfiler()._compute_hourly_fractions(s, e)
         # expected = 2* map(lambda x: x / 2,
         #     StaticTimeProfiler.DEFAULT_DAILY_HOURLY_FRACTIONS)
-        # assert_arrays_are_approximately_equal(r, expected)
+        # assert_approximately_equal(r, expected)
 
         # stp = StaticTimeProfiler(self.DAILY_HOURLY_FRACTIONS)
         # r = stp._compute_hourly_fractions(s, e)
         # expected = 2* map(lambda x: x / 2, self.DAILY_HOURLY_FRACTIONS)
-        # assert_arrays_are_approximately_equal(r, expected)
+        # assert_approximately_equal(r, expected)
 
         pass
 
