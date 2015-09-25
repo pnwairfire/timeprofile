@@ -116,7 +116,7 @@ class StaticTimeProfiler(object):
         # TODO: other checks ?
         if local_start_time >= local_end_time:
             raise InvalidStartEndTimesError(
-                "The fire's start time, {}, is later than its end time, {}".format(
+                "The fire's start time, {}, is not before its end time, {}".format(
                 local_start_time.isoformat(), local_end_time.isoformat()))
 
     def _validate_hourly_fractions(self, num_hours, hourly_fractions):
