@@ -114,7 +114,7 @@ class StaticTimeProfiler(object):
         """Raises an InvalidStartEndTimesError exception if times are invalid.
         """
         # TODO: other checks ?
-        if local_start_time > local_end_time:
+        if local_start_time >= local_end_time:
             raise InvalidStartEndTimesError(
                 "The fire's start time, {}, is later than its end time, {}".format(
                 local_start_time.isoformat(), local_end_time.isoformat()))
