@@ -74,7 +74,15 @@ class StaticTimeProfiler(object):
         kwargs:
          - hourly_fractions - custom hourly fractions of emissions; can be
            specified for all hours from start to end times, or for a single 24
-           hour day, to be repeated to fill the given time window.
+           hour day, to be repeated or truncated to fill the time window defined
+           by local_start_time / local_end_time
+
+        *Note*: If len(hourly_fractions) == 24, they are assumed to represent
+           fractions from 00:00 through 23:00.  If the start/end define a 24 hour
+           period that does *not* start at 00:00, be aware that the values
+           in hourly_fractions will *not* be applied from index 0 through 23.
+           Whenever len(hourly_fractions) == 24 (regardless of the start/end),
+           the local hour of day is used as the index to hourly_fractions.
         """
         self.hourly_fractions = self._compute_hourly_fractions(
             local_start_time, local_end_time, hourly_fractions)
