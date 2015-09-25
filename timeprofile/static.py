@@ -94,7 +94,7 @@ class StaticTimeProfiler(object):
     def profile(self, emissions):
         """Computes the time profile emissions
         """
-        self._validate_emissions(emissions, local_start_time, local_end_time)
+        self._validate_emissions(emissions)
 
         tpe = nested_dict()
         for category in emissions:
