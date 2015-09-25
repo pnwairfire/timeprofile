@@ -98,12 +98,15 @@ class StaticTimeProfiler(object):
 
         tpe = nested_dict()
         for category in emissions:
-            for phase in emissions[category]:
-                for species in emissions[category][phase]:
-                    tpe[category][phase][species] = []
-                    for val in emissions[category][phase][species]:
-                        e = map(lambda x: x*val, self.hourly_fractions[phase])
-                        tpe[category][phase][species].append(e)
+            for subcategory in emissions[category]:
+                for phase in emissions[category][subcategory]:
+                    # make sure phase isn't "total" (any other invalid phase)
+                    if phase in self.hourly_fractions:
+                        for species in emissions[category][subcategory][phase]:
+                            tpe[category][subcategory][phase][species] = []
+                            for val in emissions[category][subcategory][phase][species]:
+                                e = map(lambda x: x*val, self.hourly_fractions[phase])
+                                tpe[category][subcategory][phase][species].append(e)
         return tpe.to_dict()
 
     ##
