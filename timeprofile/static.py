@@ -42,7 +42,7 @@ class StaticTimeProfiler(object):
         0.005700, # 06:00
         0.005700, # 07:00
         0.005700, # 08:00
-        0.005700, # 09:00
+        0.005800, # 09:00
         0.020000, # 10:00
         0.040000, # 11:00
         0.070000, # 12:00
@@ -53,13 +53,19 @@ class StaticTimeProfiler(object):
         0.120000, # 17:00
         0.070000, # 18:00
         0.040000, # 19:00
-        0.005700, # 20:00
+        0.005800, # 20:00
         0.005700, # 21:00
         0.005700, # 22:00
         0.005700 # 23:00
     ])
     """DEFAULT_DAILY_HOURLY_FRACTIONS will return the same hourly fractions
-    for 'flaming', 'smoldering' and 'residual'"""
+    for 'flaming', 'smoldering' and 'residual'
+
+    These hourly fractions were copied from the wrap_time_profile module in
+    BlueSky Framework, and modified slightly.  The 09:00 and 20:00 were both
+    increased from 0.0057 to 0.0058 so that the values add up to 1.00.  (The
+    values in wrap_time_profile add up to 0.9998)
+    """
 
     def __init__(self, local_start_time, local_end_time, hourly_fractions=None): #, **options):
         """StaticTimeProfiler constructor
