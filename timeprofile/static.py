@@ -30,6 +30,7 @@ class InvalidEmissionsDataError(ValueError):
 
 class StaticTimeProfiler(object):
 
+    # Include 'area_frac[tion]', and rename PHASES to something else?
     PHASES = ['flaming', 'smoldering', 'residual']
 
     DEFAULT_DAILY_HOURLY_FRACTIONS = defaultdict(lambda: [
@@ -169,11 +170,12 @@ class StaticTimeProfiler(object):
         # TODO: if more efficient, iterate by phase within the while loop
         new_hourly_fractions = {}
         for p in self.PHASES:
+            num_hourly_fractions = len(hourly_fractions[p])
             r = []
             i = 0
             d = start_hour
             while d <= end_hour:
-                idx = d.hour if num_hours == 24 else i
+                idx = d.hour if num_hourly_fractions == 24 else i
                 f = hourly_fractions[p][idx]
                 if d == start_hour:
                     f *= (3600 - first_hour_offset.seconds) / 3600
