@@ -67,76 +67,16 @@ it means you need in upgrade pip.  One way to do so is with the following:
 
 ## Usage
 
-Let's say you start with the following, abbreviated set of emissions output
-
-    {
-        'ground fuels': {
-            'basal accumulations': {
-                'flaming': {
-                    'CO': [3.3815120047017005e-05,
-                        0.012923999999999995
-                    ]
-                },
-                'residual': {
-                    'PM10': [4.621500211796271e-05, 0.0003925152]
-                },
-                'smoldering': {
-                    'NH3': [6.424985839975172e-06, 0.0007844288]
-                }
-            },
-        },
-        'summary': {
-            'ground fuels': {
-                'flaming': {
-                    'CO': [3.3815120047017005e-05,
-                        0.012923999999999995
-                    ]
-                },
-                'residual': {
-                    'PM10': [4.621500211796271e-05, 0.0003925152]
-                },
-                'smoldering': {
-                    'NH3': [6.424985839975172e-06, 0.0007844288]
-                }
-            },
-            'litter-lichen-moss': {
-                'flaming': {
-                    'CO': [0.17116545599999997,
-                        0.07897999999999998
-                    ]
-                },
-                'residual': {
-                    'PM10': [0.0, 0.0]
-                },
-                'smoldering': {
-                    'NH3': [0.0009033891328, 0.00341056]
-                }
-            },
-            'total': {
-                'flaming': {
-                    'CO': [0.1795595846677937, 0.09980199999999997]
-                },
-                'residual': {
-                    'PM10': [0.005759220127912722, 0.006672758399999999]
-                },
-                'smoldering': {
-                    'NH3': [0.0015054969384185898, 0.004604256]
-                },
-                'total': {
-                    'CO': [0.1795595846677937, 0.09980199999999997],
-                    'NH3': [0.0015054969384185898, 0.004604256],
-                    'PM10': [0.005759220127912722, 0.006672758399999999]
-                }
-            },
-        }
-    }
-
-The simplest case is when the emissions output are from a 24-hour period,
+The simplest case is when the time window is a 24-hour period,
 from midnight to midnight.  In this case, time profiling would yield the
 following:
 
     ...FILL IN...
 
-A more complicated scenario would be if the emissions are from a period of, say, 36 hours, starting at 6:00am on day and going until 6:00pm the following day.  Time profiling would yield the following:
+A more complicated scenario would be a time window of, say, 36 hours, starting at 6:00am on day and going until 6:00pm the following day.  Time profiling would yield the following:
+
+    ...FILL IN...
+
+A even more complicated scenario would be a time window of, say, 36.75 hours, starting at 6:30am on day and going until 7:15pm the following day.  Time profiling would yield the following:
 
     ...FILL IN...
