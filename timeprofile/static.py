@@ -84,30 +84,10 @@ class StaticTimeProfiler(object):
            Whenever len(hourly_fractions) == 24 (regardless of the start/end),
            the local hour of day is used as the index to hourly_fractions.
         """
-        self.hourly_fractions = self._compute_hourly_fractions(
-            local_start_time, local_end_time, hourly_fractions)
-
-    ##
-    ## Public interface
-    ##
-
-    def profile(self, emissions):
-        """Computes the time profile emissions
-        """
-        self._validate_emissions(emissions)
-
-        tpe = nested_dict()
-        for category in emissions:
-            for subcategory in emissions[category]:
-                for phase in emissions[category][subcategory]:
-                    # make sure phase isn't "total" (any other invalid phase)
-                    if phase in self.hourly_fractions:
-                        for species in emissions[category][subcategory][phase]:
-                            tpe[category][subcategory][phase][species] = []
-                            for val in emissions[category][subcategory][phase][species]:
-                                e = map(lambda x: x*val, self.hourly_fractions[phase])
-                                tpe[category][subcategory][phase][species].append(e)
-        return tpe.to_dict()
+        # _compute_hourly_fractions will set self.start_hour, self.end_hour,
+        # and self.hourly_fractions
+        self._compute_hourly_fractions(local_start_time, local_end_time,
+            hourly_fractions)
 
     ##
     ## Validation Methods
@@ -135,10 +115,6 @@ class StaticTimeProfiler(object):
                         " for each of the '{}' phases".format(
                         num_hours, ', '.join(self.PHASES)))
 
-    def _validate_emissions(self, emissions):
-        # TODO: check emissions data
-        pass
-
     ##
     ## Computing Hourly Fractions
     ##
@@ -161,19 +137,19 @@ class StaticTimeProfiler(object):
 
         first_hour_offset = datetime.timedelta(
             minutes=local_start_time.minute, seconds=local_start_time.second)
-        start_hour = local_start_time - first_hour_offset
+        self.start_hour = local_start_time - first_hour_offset
 
         if local_end_time.time() == datetime.time(local_end_time.hour):
             # fire ended exactly on the hour
-            end_hour = local_end_time - self.ONE_HOUR
+            self.end_hour = local_end_time - self.ONE_HOUR
             last_hour_offset = self.ONE_HOUR
         else:
             last_hour_offset = datetime.timedelta(
                 minutes=local_end_time.minute, seconds=local_end_time.second)
-            end_hour = local_end_time - first_hour_offset
+            self.end_hour = local_end_time - first_hour_offset
 
         # TODO: use math.ceil instead of int? (should have divided evenly, so prob not)
-        num_hours = int((end_hour - start_hour).total_seconds() / 3600) + 1
+        num_hours = int((self.end_hour - self.start_hour).total_seconds() / 3600) + 1
         self._validate_hourly_fractions(num_hours, hourly_fractions)
 
         hourly_fractions = hourly_fractions or self.DEFAULT_DAILY_HOURLY_FRACTIONS
@@ -184,13 +160,13 @@ class StaticTimeProfiler(object):
             num_hourly_fractions = len(hourly_fractions[p])
             r = []
             i = 0
-            d = start_hour
-            while d <= end_hour:
+            d = self.start_hour
+            while d <= self.end_hour:
                 idx = d.hour if num_hourly_fractions == 24 else i
                 f = hourly_fractions[p][idx]
-                if d == start_hour:
+                if d == self.start_hour:
                     f *= (3600 - first_hour_offset.seconds) / 3600
-                elif d == end_hour:
+                elif d == self.end_hour:
                     f *= last_hour_offset.seconds / 3600
                 r.append(f)
                 d += self.ONE_HOUR
@@ -199,4 +175,5 @@ class StaticTimeProfiler(object):
             # Normalize so that it all adds up to 1.0
             total = reduce(lambda x, y: x + y, r)
             new_hourly_fractions[p] = map(lambda x: x / total, r)
-        return new_hourly_fractions
+
+        self.hourly_fractions = new_hourly_fractions

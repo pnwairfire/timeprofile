@@ -27,42 +27,6 @@ def assert_approximately_equal(expected, actual):
     else:
         assert expected == actual
 
-# def assert_approximately_equal(expected, actual):
-#     # categories
-
-#     assert set(expected.keys()) == set(actual.keys())
-#     for c in expected.keys():
-#         print '- %s' % (c)
-#         # sub-categories
-#         assert set(expected[c].keys()) == set(actual[c].keys())
-#         for sc in expected[c].keys():
-#             print ' - %s' % (sc)
-#             # combustion phases
-#             assert set(expected[c][sc].keys()) == set(actual[c][sc].keys())
-#             for cp in expected[c][sc].keys():
-#                 print '  - %s' % (cp)
-#                 # chemical species
-#                 assert set(expected[c][sc][cp].keys()) == set(actual[c][sc][cp].keys())
-#                 for s in expected[c][sc][cp].keys():
-#                     print '   - %s' % (s)
-#                     # emissions values
-#                     assert len(expected[c][sc][cp][s]) == len(actual[c][sc][cp][s])
-#                     for i in xrange(len(expected[c][sc][cp][s])):
-#                         print "expected[%s][%s][%s][%s][%s][%s] vs actual[%s][%s][%s][%s][%s][%s]" % (
-#                             c,sc,cp,s,i,expected[c][sc][cp][s][i],
-#                             c,sc,cp,s,i,actual[c][sc][cp][s][i])
-#                         if expected[c][sc][cp][s][i] is None:
-#                             assert None == actual[c][sc][cp][s][i]
-#                         else:
-#                             # first argument in assert_approx_equal is actual,
-#                             # second is epected (it doesn't matter except that
-#                             # error message will be misleading if order is reversed)
-#                             assert_approx_equal(
-#                                 actual[c][sc][cp][s][i],
-#                                 expected[c][sc][cp][s][i],
-#                                 significant=8  # arbitrarily chose 8
-#                             )
-
 class TestStaticTimeProfiler_ValidationMethods(object):
 
     def _dummy_profiler(self, monkeypatch):
@@ -85,13 +49,11 @@ class TestStaticTimeProfiler_ValidationMethods(object):
         profiler._validate_start_end_times(st, et)
 
     # TODO: add test for _validate_hourly_fractions
-    # TODO: add test for _validate_emissions
 
 class TestStaticTimeProfiler_DefaultHourlyFractions(object):
 
 
     def test_one_day(self):
-        # First make sure daily fractions are computed correctly
         st = datetime.datetime(2015, 1, 1, 0)
         et = datetime.datetime(2015, 1, 2, 0)
         stp = StaticTimeProfiler(st, et)
@@ -100,12 +62,10 @@ class TestStaticTimeProfiler_DefaultHourlyFractions(object):
             p: stp.DEFAULT_DAILY_HOURLY_FRACTIONS[p] for p in stp.PHASES
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
-
-        # Now, test computation of profiled emissions
-        # TODO: ....
+        assert stp.start_hour == st
+        assert stp.end_hour == datetime.datetime(2015, 1, 1, 23)
 
     def test_two_days(self):
-        # First make sure daily fractions are computed correctly
         st = datetime.datetime(2015, 1, 1, 0)
         et = datetime.datetime(2015, 1, 3, 0)
         stp = StaticTimeProfiler(st, et)
@@ -115,17 +75,16 @@ class TestStaticTimeProfiler_DefaultHourlyFractions(object):
                 for p in stp.PHASES
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
-
-        # Now, test computation of profiled emissions
-        # TODO: ....
+        assert stp.start_hour == st
+        assert stp.end_hour == datetime.datetime(2015, 1, 2, 23)
 
     def test_partial_days(self):
-        # First make sure daily fractions are computed correctly
-        # TODO: ...
-
-        # Now, test computation of profiled emissions
-        # TODO: ...
-        pass
+        s = datetime.datetime(2015, 1, 1, 12, 20)
+        e = datetime.datetime(2015, 1, 2, 16, 40)
+        stp = StaticTimeProfiler(s, e)
+        # TDOD: add assert to check hourly fractions
+        assert stp.start_hour == datetime.datetime(2015, 1, 1, 12)
+        assert stp.end_hour == datetime.datetime(2015, 1, 2, 16)
 
 
 class TestStaticTimeProfiler_CustomDailyHourlyFractions(object):
@@ -160,9 +119,8 @@ class TestStaticTimeProfiler_CustomDailyHourlyFractions(object):
             p: self.DAILY_HOURLY_FRACTIONS[p] for p in stp.PHASES
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
-
-        # Now, test computation of profiled emissions
-        # TODO: ....
+        assert stp.start_hour == st
+        assert stp.end_hour == datetime.datetime(2015, 1, 1, 23)
 
     def test_two_days(self):
         st = datetime.datetime(2015, 1, 1, 0)
@@ -172,18 +130,23 @@ class TestStaticTimeProfiler_CustomDailyHourlyFractions(object):
         # expected = 2* map(lambda x: x / 2,
         #     StaticTimeProfiler.DEFAULT_DAILY_HOURLY_FRACTIONS)
         # assert_approximately_equal(r, expected)
+        assert stp.start_hour == st
+        assert stp.end_hour == datetime.datetime(2015, 1, 2, 23)
 
         # stp = StaticTimeProfiler(self.DAILY_HOURLY_FRACTIONS)
         # r = stp._compute_hourly_fractions(s, e)
         # expected = 2* map(lambda x: x / 2, self.DAILY_HOURLY_FRACTIONS)
         # assert_approximately_equal(r, expected)
+        # assert stp.start_hour == st
+        # assert stp.end_hour == datetime.datetime(2015, 1, 2, 23)
 
         pass
 
     def test_partial_days(self):
-        # s = datetime.datetime(2015, 1, 1, 12, 20)
-        # e = datetime.datetime(2015, 1, 2, 16, 40)
-        # stp = StaticTimeProfiler(self.DAILY_HOURLY_FRACTIONS)
+        s = datetime.datetime(2015, 1, 1, 12, 20)
+        e = datetime.datetime(2015, 1, 2, 16, 40)
+        stp = StaticTimeProfiler(s, e,
+            hourly_fractions=self.DAILY_HOURLY_FRACTIONS)
         # r = stp._compute_hourly_fractions(s, e)
         # print r
         # TODO: This is what is returned; verify manually that it is correct,
@@ -219,9 +182,9 @@ class TestStaticTimeProfiler_CustomDailyHourlyFractions(object):
         #     0.10257725349403765,
         #     0.108988331837415
         # ]
-        # TODO: add assert
-
-        pass
+        # TODO: add assert to check hourly fractions
+        assert stp.start_hour == datetime.datetime(2015, 1, 1, 12)
+        assert stp.end_hour == datetime.datetime(2015, 1, 2, 16)
 
 class TestStaticTimeProfiler_CustomHourlyFractions(object):
 
@@ -273,9 +236,8 @@ class TestStaticTimeProfiler_CustomHourlyFractions(object):
             p: self.HOURLY_FRACTIONS[p] for p in stp.PHASES
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
-
-        # Now, test computation of profiled emissions
-        # TODO: ...
+        assert stp.start_hour == st
+        assert stp.end_hour == datetime.datetime(2015, 1, 2, 23)
 
     def test_three_days(self):
         st = datetime.datetime(2015, 1, 1, 0)
