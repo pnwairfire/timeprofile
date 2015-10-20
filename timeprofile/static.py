@@ -146,7 +146,7 @@ class StaticTimeProfiler(object):
         else:
             last_hour_offset = datetime.timedelta(
                 minutes=local_end_time.minute, seconds=local_end_time.second)
-            self.end_hour = local_end_time - first_hour_offset
+            self.end_hour = local_end_time - last_hour_offset
 
         # TODO: use math.ceil instead of int? (should have divided evenly, so prob not)
         num_hours = int((self.end_hour - self.start_hour).total_seconds() / 3600) + 1
