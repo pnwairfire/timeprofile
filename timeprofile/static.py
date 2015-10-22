@@ -30,8 +30,7 @@ class InvalidEmissionsDataError(ValueError):
 
 class StaticTimeProfiler(object):
 
-    # Include 'area_frac[tion]', and rename PHASES to something else?
-    PHASES = ['flaming', 'smoldering', 'residual']
+    FIELDS = ['area_fraction', 'flaming', 'smoldering', 'residual']
 
     DEFAULT_DAILY_HOURLY_FRACTIONS = defaultdict(lambda: [
         0.005700, # 00:00 (local time)
@@ -107,13 +106,13 @@ class StaticTimeProfiler(object):
         fails.
         """
         if hourly_fractions:
-            for k in self.PHASES:
+            for k in self.FIELDS:
                 if (len(hourly_fractions.get(k, [])) not in (24, num_hours) or
                         abs(1 - sum(hourly_fractions[k])) > 0.001):
                     raise InvalidHourlyFractionsError(
                         "There must be 24 or {} hourly fractions that sum to 1.00"
-                        " for each of the '{}' phases".format(
-                        num_hours, ', '.join(self.PHASES)))
+                        " for each of the '{}' fields".format(
+                        num_hours, ', '.join(self.FIELDS)))
 
     ##
     ## Computing Hourly Fractions
@@ -156,7 +155,7 @@ class StaticTimeProfiler(object):
 
         # TODO: if more efficient, iterate by phase within the while loop
         new_hourly_fractions = {}
-        for p in self.PHASES:
+        for p in self.FIELDS:
             num_hourly_fractions = len(hourly_fractions[p])
             r = []
             i = 0

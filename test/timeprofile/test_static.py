@@ -57,9 +57,9 @@ class TestStaticTimeProfiler_DefaultHourlyFractions(object):
         st = datetime.datetime(2015, 1, 1, 0)
         et = datetime.datetime(2015, 1, 2, 0)
         stp = StaticTimeProfiler(st, et)
-        #assert set(stp.PHASES) == set(stp.hourly_fractions.keys())
+        #assert set(stp.FIELDS) == set(stp.hourly_fractions.keys())
         expected_hourly_fractions = {
-            p: stp.DEFAULT_DAILY_HOURLY_FRACTIONS[p] for p in stp.PHASES
+            p: stp.DEFAULT_DAILY_HOURLY_FRACTIONS[p] for p in stp.FIELDS
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
         assert stp.start_hour == st
@@ -69,10 +69,10 @@ class TestStaticTimeProfiler_DefaultHourlyFractions(object):
         st = datetime.datetime(2015, 1, 1, 0)
         et = datetime.datetime(2015, 1, 3, 0)
         stp = StaticTimeProfiler(st, et)
-        #assert set(stp.PHASES) == set(stp.hourly_fractions.keys())
+        #assert set(stp.FIELDS) == set(stp.hourly_fractions.keys())
         expected_hourly_fractions = {
             p: 2 * map( lambda e: e / 2.0, stp.DEFAULT_DAILY_HOURLY_FRACTIONS[p])
-                for p in stp.PHASES
+                for p in stp.FIELDS
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
         assert stp.start_hour == st
@@ -90,6 +90,12 @@ class TestStaticTimeProfiler_DefaultHourlyFractions(object):
 class TestStaticTimeProfiler_CustomDailyHourlyFractions(object):
 
     DAILY_HOURLY_FRACTIONS = {
+        'area_fraction': [
+            0.004, 0.006, 0.01, 0.01, 0.01, 0.01,
+            0.05, 0.05, 0.05, 0.05, 0.05, 0.05,
+            0.10, 0.10, 0.05, 0.05, 0.05, 0.05,
+            0.05, 0.05, 0.05, 0.05, 0.03, 0.02,
+        ],
         'flaming': [
             0.005, 0.005, 0.01, 0.01, 0.01, 0.01,
             0.05, 0.05, 0.05, 0.05, 0.05, 0.05,
@@ -114,9 +120,9 @@ class TestStaticTimeProfiler_CustomDailyHourlyFractions(object):
         st = datetime.datetime(2015, 1, 1, 0)
         et = datetime.datetime(2015, 1, 2, 0)
         stp = StaticTimeProfiler(st, et, hourly_fractions=self.DAILY_HOURLY_FRACTIONS)
-        #assert set(stp.PHASES) == set(stp.hourly_fractions.keys())
+        #assert set(stp.FIELDS) == set(stp.hourly_fractions.keys())
         expected_hourly_fractions = {
-            p: self.DAILY_HOURLY_FRACTIONS[p] for p in stp.PHASES
+            p: self.DAILY_HOURLY_FRACTIONS[p] for p in stp.FIELDS
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
         assert stp.start_hour == st
@@ -190,6 +196,16 @@ class TestStaticTimeProfiler_CustomHourlyFractions(object):
 
     # 48 hours worth of hourly fractions
     HOURLY_FRACTIONS = {
+        'area_fraction': [
+            0.004, 0.006, 0.01, 0.01, 0.01, 0.01,
+            0.05, 0.05, 0.05, 0.05, 0.05, 0.05,
+            0.05, 0.10, 0.05, 0.05, 0.05, 0.05,
+            0.05, 0.05, 0.05, 0.05, 0.03, 0.02,
+            0.02, 0.02, 0.01, 0.00, 0.00, 0.00,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        ],
         'flaming': [
             0.005, 0.005, 0.01, 0.01, 0.01, 0.01,
             0.05, 0.05, 0.05, 0.05, 0.05, 0.05,
@@ -233,7 +249,7 @@ class TestStaticTimeProfiler_CustomHourlyFractions(object):
         et = datetime.datetime(2015, 1, 3, 0)
         stp = StaticTimeProfiler(st, et, hourly_fractions=self.HOURLY_FRACTIONS)
         expected_hourly_fractions = {
-            p: self.HOURLY_FRACTIONS[p] for p in stp.PHASES
+            p: self.HOURLY_FRACTIONS[p] for p in stp.FIELDS
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
         assert stp.start_hour == st
