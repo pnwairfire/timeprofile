@@ -2,6 +2,10 @@
 
 This package provides a module for time profiling emissions output.
 
+***This software is provided for research purposes only. It's output may
+not accurately reflect observed data due to numerous reasons. Data are
+provisional; use at own risk.***
+
 ## Development
 
 ### Clone Repo
