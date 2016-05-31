@@ -5,7 +5,6 @@ In this simple, static time-profiling model, no environmental conditions
 """
 
 __author__      = "Joel Dubowy"
-__copyright__   = "Copyright 2014, AirFire, PNW, USFS"
 
 import datetime
 from collections import defaultdict
