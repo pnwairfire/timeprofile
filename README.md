@@ -63,9 +63,9 @@ First, install pip (with sudo if necessary):
     apt-get install python-pip
     pip install --upgrade pip
 
-Then, to install, for example, v0.1.2, use the following (with sudo if necessary):
+Then, to install, for example, v1.0.0, use the following (with sudo if necessary):
 
-    pip install --trusted-host pypi.smoke.airfire.org -i http://pypi.smoke.airfire.org/simple timeprofile==v0.1.2
+    pip install --trusted-host pypi.smoke.airfire.org -i http://pypi.smoke.airfire.org/simple timeprofile==1.0.0
 
 If you get an error like
 
