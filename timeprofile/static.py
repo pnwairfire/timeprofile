@@ -10,6 +10,7 @@ import datetime
 from collections import defaultdict
 
 from nested_dict import nested_dict
+from functools import reduce
 
 __all__ = [
     'StaticTimeProfiler',
@@ -172,6 +173,6 @@ class StaticTimeProfiler(object):
 
             # Normalize so that it all adds up to 1.0
             total = reduce(lambda x, y: x + y, r)
-            new_hourly_fractions[p] = map(lambda x: x / total, r)
+            new_hourly_fractions[p] = [x / total for x in r]
 
         self.hourly_fractions = new_hourly_fractions

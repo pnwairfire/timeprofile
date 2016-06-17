@@ -19,7 +19,7 @@ def assert_approximately_equal(expected, actual):
             assert_approximately_equal(expected[k], actual[k])
     elif isinstance(expected, list) and isinstance(actual, list):
         assert len(expected) == len(actual)
-        for i in xrange(len(expected)):
+        for i in range(len(expected)):
             assert_approximately_equal(expected[i], actual[i])
     elif isinstance(expected, float) and isinstance(actual, float):
         assert_approx_equal(actual, expected, significant=8)  # arbitrarily chose 8
@@ -70,7 +70,7 @@ class TestStaticTimeProfiler_DefaultHourlyFractions(object):
         stp = StaticTimeProfiler(st, et)
         #assert set(stp.FIELDS) == set(stp.hourly_fractions.keys())
         expected_hourly_fractions = {
-            p: 2 * map( lambda e: e / 2.0, stp.DEFAULT_DAILY_HOURLY_FRACTIONS[p])
+            p: 2 * [e / 2.0 for e in stp.DEFAULT_DAILY_HOURLY_FRACTIONS[p]]
                 for p in stp.FIELDS
         }
         assert_approximately_equal(expected_hourly_fractions, stp.hourly_fractions)
