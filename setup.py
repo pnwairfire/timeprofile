@@ -29,7 +29,7 @@ setup(
     description='Package for time profiling emissions output.',
     install_requires=[
         "nested_dict",
-        "pyairfire>=0.8.16"
+        "pyairfire>=1.1.1"
     ],
     dependency_links=[
         "https://pypi.smoke.airfire.org/simple/pyairfire/",
