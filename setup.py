@@ -32,7 +32,7 @@ setup(
         "pyairfire>=1.1.1,<2.0.0"
     ],
     dependency_links=[
-        "https://pypi.smoke.airfire.org/simple/pyairfire/",
+        "https://pypi.airfire.org/simple/pyairfire/",
     ],
     tests_require=test_requirements
 )
