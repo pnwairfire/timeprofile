@@ -18,11 +18,12 @@ class BaseTimeProfiler(object):
     ONE_HOUR = datetime.timedelta(hours=1)
     FIELDS = ['area_fraction', 'flaming', 'smoldering', 'residual']
 
-    def _validate_start_end_times(self, local_start_time, local_end_time):
+    def _validate_start_end_times(self, local_start_time, local_end_time,
+            time_qualifier=""):
         """Raises an InvalidStartEndTimesError exception if times are invalid.
         """
         # TODO: other checks ?
         if local_start_time >= local_end_time:
-            raise InvalidStartEndTimesError(
-                "The fire's start time, {}, is not before its end time, {}".format(
+            raise InvalidStartEndTimesError("The fire's {} start time, {},"
+                " is not before its end time, {}".format(time_qualifier,
                 local_start_time.isoformat(), local_end_time.isoformat()))
