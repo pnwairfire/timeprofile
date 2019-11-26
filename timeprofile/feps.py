@@ -4,6 +4,8 @@ FEPS timeprofile, as described in
 https://www.fs.fed.us/pnw/fera/feps/FEPS_users_guide.pdf
 """
 
+from . import BaseTimeProfiler, InvalidStartEndTimesError
+
 class FireType(object):
 
     RX = 'rx'
@@ -12,13 +14,15 @@ class FireType(object):
 
 class FepsTimeProfiler(BaseTimeProfiler):
 
-    def __init__(self, local_ignition_start_time, local_ignition_end_time,
-            fire_type=FireType.RX):
-        self._validate_start_end_times(local_ignition_start_time,
-            local_ignition_end_time)
+    # TODO: do we need fire_type?  can be inferred as rx if ignition times
+    #   are defined
 
-        self._local_ignition_start_time = local_ignition_start_time
-        self._local_ignition_end_time = local_ignition_end_time
+    def __init__(self, local_start_time, local_end_time,
+            local_ignition_start_time=None, local_ignition_end_time=None,
+            fire_type=FireType.RX):
+
+        self._set_times(local_start_time, local_end_time,
+            local_ignition_start_time, local_ignition_end_time, fire_type)
 
         # TODO: implement WF equation
         if fire_type == FireType.WF:
@@ -27,16 +31,45 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
         return getattr(self, '_compute_' + fire_type)()
 
-    ## Validation Methods
+    ## Initialization
 
-    def _validate_start_end_times(self, local_ignition_start_time,
-            local_ignition_end_time):
-        # Super makes sure start < end
-        super()._validate_start_end_times(local_ignition_start_time, local_ignition_end_time)
+    def _set_times(self, start, end, ig_start, ig_end):
+        # Makes sure start < end
+        self._validate_start_end_times(start, end)
+        self._start = start
+        self._end = end
 
-        # TODO: Make sure start and end are on the hour (i.e. minutes = 0) ?
-        # TODO: Make sure start and end don't span midnight ???
+        # fill in local_ignition_start_time and/or local_ignition_end_time
+        # if necessary
+        if ig_start and ig_end:
+            self._validate_start_end_times(start, end,
+                time_qualifier="ignition")
+            self._ig_start = ig_start
+            self._ig_end = ig_end
+        elif ig_start:
+            self._ig_start = ig_start
+            self._ig_end = ig_start + 3*self.ONE_HOUR
+        elif ig_end:
+            self._ig_start = ig_end - 3*self.ONE_HOUR
+            self._ig_end = ig_end
+        else:
+            # set ig_start to 9am of start day if start is before 9am, else
+            # set to start.  set ig_end to three hours after start.
+            # then, shift and shrink window as necessary.  for eaxmple:
+            #   - 12am start to 6am end -> 3am to 6am ignition
+            #   - 8am start to 10am end -> 8am to 10 am end
+            start_9am = datetime.datetime(start.year, start.month, start.day, 9)
+            self._ig_start = max(start_9m, start)
+            self._ig_end = self._ig_start + 3*self.ONE_HOUR
 
+            # shift
+            while (self._ig_end > self._end
+                    and (self._ig_start - self.ONE_HOUR) >= self._start):
+                self._ig_start -= self.ONE_HOUR
+                self._ig_end -= self.ONE_HOUR
+
+            # shrink
+            self._ig_end  = min(self._ig_end, self._end)
 
     ## Rx
 
@@ -50,28 +83,37 @@ class FepsTimeProfiler(BaseTimeProfiler):
         return hourly_fractions
 
     def _compute_rx_flaming(self):
-        """Computes the hourly flaming consumption based on equations (19) and (21)
-        in the paper referenced above, which are as follows:
+        """Computes the hourly flaming consumption rate based on equations
+        (19) and (21) in the paper referenced above, which are as follows:
 
             area_i = area_j + (area_k - area_j) * ( (hour_i - hour_j) / (hour_k - hour_j) )
             consumption_rate_i = area_i - area_i-1
 
-        Since we're assuming the entire fire takes places between local_ignition_start_time
-        and local_ignition_end_time, and since we're assuming total area 1 (since we're
+        Since we're assuming the entire area is consumed between ignition start
+        and ignition end, and since we're assuming total area 1 (since we're
         only concerned with fractions per hour), we get
 
-            area_i = (hour_i - hour_j) / (hour_k - hour_j)
+            consumption_hour_i = 1 / hours_of_ignition
+
+        Which basically menas that the consumption (and by extension, emissions)
+        is divided evenly over the hours of ignition.
+
+        We just have to fill in hours outside of the ignition window with zeros.
+
+        Note: partial ignition hours are supported
         """
-        areas = []
-        num_hours = (self._local_ignition_end_time
-            - self._local_ignition_end_time).hours
-        for i in range(num_hours):
-            a = (1 - )
-            areas.append(a)
+        hourly_fractions = []
+        total_ig_minutes = (self._ig_end - self._ig_end).minutes
+        hr = self._start.to_date()
+        while hr <= self._end:
+            hr_end = hr + self.ONE_HOUR
+            overlap_start = max(hr, self._ig_start)
+            overlap_end = min(hr_end, self._ig_end)
+            overlap_minutes = max(0, overlap_end - overlap_start)
+            hourly_fractions += overlap_minutes / total_ig_minutes
             hr += self.ONE_HOUR
 
-        #area_i = area_j + (area_k - area_j) * ( hour_idx / num_hours)
-        #consumption_rate_i = area_i - area_i-1
+        return hourly_fractions
 
     def _compute_rx_smoldering(self):
         pass
