@@ -12,6 +12,8 @@ from collections import defaultdict
 from nested_dict import nested_dict
 from functools import reduce
 
+from . import BaseTimeProfiler
+
 __all__ = [
     'StaticTimeProfiler',
     'InvalidHourlyFractionsError',
@@ -28,9 +30,7 @@ class InvalidStartEndTimesError(ValueError):
 class InvalidEmissionsDataError(ValueError):
     pass
 
-class StaticTimeProfiler(object):
-
-    FIELDS = ['area_fraction', 'flaming', 'smoldering', 'residual']
+class StaticTimeProfiler(BaseTimeProfiler):
 
     DEFAULT_DAILY_HOURLY_FRACTIONS = defaultdict(lambda: [
         0.005700, # 00:00 (local time)
@@ -92,15 +92,6 @@ class StaticTimeProfiler(object):
     ## Validation Methods
     ##
 
-    def _validate_start_end_times(self, local_start_time, local_end_time):
-        """Raises an InvalidStartEndTimesError exception if times are invalid.
-        """
-        # TODO: other checks ?
-        if local_start_time >= local_end_time:
-            raise InvalidStartEndTimesError(
-                "The fire's start time, {}, is not before its end time, {}".format(
-                local_start_time.isoformat(), local_end_time.isoformat()))
-
     def _validate_hourly_fractions(self, num_hours, hourly_fractions):
         """Raises an InvalidHourlyFractionsError exception if validation
         fails.
@@ -114,17 +105,16 @@ class StaticTimeProfiler(object):
                         " for each of the '{}' fields".format(
                         num_hours, ', '.join(self.FIELDS)))
 
+
     ##
     ## Computing Hourly Fractions
     ##
 
-    ONE_HOUR = datetime.timedelta(hours=1)
 
     def _compute_hourly_fractions(self, local_start_time, local_end_time,
             hourly_fractions):
         """Determines what fraction of the fire's emissions occur in each
         calendar hour of the fire's duration.
-
         For example, if....
 
         Args:
