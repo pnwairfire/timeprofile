@@ -85,8 +85,8 @@ class StaticTimeProfiler(BaseTimeProfiler):
         """
         # _compute_hourly_fractions will set self.start_hour, self.end_hour,
         # and self.hourly_fractions
-        self._compute_hourly_fractions(local_start_time, local_end_time,
-            hourly_fractions)
+        self._set_times(local_start_time, local_end_time)
+        self._compute_hourly_fractions(hourly_fractions)
 
     ##
     ## Validation Methods
@@ -111,31 +111,37 @@ class StaticTimeProfiler(BaseTimeProfiler):
     ##
 
 
-    def _compute_hourly_fractions(self, local_start_time, local_end_time,
-            hourly_fractions):
-        """Determines what fraction of the fire's emissions occur in each
-        calendar hour of the fire's duration.
-        For example, if....
+    def _set_times(self, local_start_time, local_end_time):
+        """Sets start and end times, and start/end hour offsets
 
         Args:
-         - emissions --
          - local_start_time --
          - local_end_time --
         """
         self._validate_start_end_times(local_start_time, local_end_time)
 
-        first_hour_offset = datetime.timedelta(
+        self._first_hour_offset = datetime.timedelta(
             minutes=local_start_time.minute, seconds=local_start_time.second)
-        self.start_hour = local_start_time - first_hour_offset
+        self.start_hour = local_start_time - self._first_hour_offset
 
         if local_end_time.time() == datetime.time(local_end_time.hour):
             # fire ended exactly on the hour
             self.end_hour = local_end_time - self.ONE_HOUR
-            last_hour_offset = self.ONE_HOUR
+            self._last_hour_offset = self.ONE_HOUR
         else:
-            last_hour_offset = datetime.timedelta(
+            self._last_hour_offset = datetime.timedelta(
                 minutes=local_end_time.minute, seconds=local_end_time.second)
-            self.end_hour = local_end_time - last_hour_offset
+            self.end_hour = local_end_time - self._last_hour_offset
+
+    def _compute_hourly_fractions(self, hourly_fractions):
+        """Determines what fraction of the fire's emissions occur in each
+        calendar hour of the fire's duration.
+
+        For example, if....
+
+        Args:
+         - hourly_fractions --
+        """
 
         # TODO: use math.ceil instead of int? (should have divided evenly, so prob not)
         num_hours = int((self.end_hour - self.start_hour).total_seconds() / 3600) + 1
@@ -154,9 +160,9 @@ class StaticTimeProfiler(BaseTimeProfiler):
                 idx = d.hour if num_hourly_fractions == 24 else i
                 f = hourly_fractions[p][idx]
                 if d == self.start_hour:
-                    f *= (3600 - first_hour_offset.seconds) / 3600
+                    f *= (3600 - self._first_hour_offset.seconds) / 3600
                 elif d == self.end_hour:
-                    f *= last_hour_offset.seconds / 3600
+                    f *= self._last_hour_offset.seconds / 3600
                 r.append(f)
                 d += self.ONE_HOUR
                 i += 1
