@@ -12,22 +12,14 @@ from collections import defaultdict
 from nested_dict import nested_dict
 from functools import reduce
 
-from . import BaseTimeProfiler
+from . import BaseTimeProfiler, InvalidStartEndTimesError
 
 __all__ = [
     'StaticTimeProfiler',
-    'InvalidHourlyFractionsError',
-    'InvalidStartEndTimesError',
-    'InvalidEmissionsDataError'
+    'InvalidHourlyFractionsError'
 ]
 
 class InvalidHourlyFractionsError(ValueError):
-    pass
-
-class InvalidStartEndTimesError(ValueError):
-    pass
-
-class InvalidEmissionsDataError(ValueError):
     pass
 
 class StaticTimeProfiler(BaseTimeProfiler):

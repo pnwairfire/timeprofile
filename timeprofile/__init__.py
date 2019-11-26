@@ -3,7 +3,15 @@ __author__      = "Joel Dubowy"
 __version_info__ = (1,0,0)
 __version__ = '.'.join([str(n) for n in __version_info__])
 
+import datetime
 
+__all__ = [
+    'BaseTimeProfiler',
+    'InvalidStartEndTimesError'
+]
+
+class InvalidStartEndTimesError(ValueError):
+    pass
 
 class BaseTimeProfiler(object):
 
@@ -18,4 +26,3 @@ class BaseTimeProfiler(object):
             raise InvalidStartEndTimesError(
                 "The fire's start time, {}, is not before its end time, {}".format(
                 local_start_time.isoformat(), local_end_time.isoformat()))
-
