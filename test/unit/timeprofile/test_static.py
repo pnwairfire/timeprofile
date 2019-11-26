@@ -8,7 +8,6 @@ from py.test import raises
 
 from timeprofile.static import (
     StaticTimeProfiler,
-    InvalidStartEndTimesError,
     InvalidHourlyFractionsError
 )
 
@@ -26,31 +25,11 @@ def assert_approximately_equal(expected, actual):
     else:
         assert expected == actual
 
-class TestStaticTimeProfiler_ValidationMethods(object):
 
-    def _dummy_profiler(self, monkeypatch):
-        monkeypatch.setattr(StaticTimeProfiler, "_compute_hourly_fractions",
-            lambda *args: None)
-        return StaticTimeProfiler(None, None)
+# TODO: add tests for StaticTimeProfiler._validate_hourly_fractions
 
-    def test_validate_start_end_times(self, monkeypatch):
-        profiler = self._dummy_profiler(monkeypatch)
-
-        st = datetime.datetime(2015, 1, 1, 11)
-        et = datetime.datetime(2015, 1, 1, 12)
-        # start can't come after end
-        with raises(InvalidStartEndTimesError) as e:
-            profiler._validate_start_end_times(et, st)
-        # start can't equal end
-        with raises(InvalidStartEndTimesError) as e:
-            profiler._validate_start_end_times(st, st)
-        # proper order of dates shouldn't raise error
-        profiler._validate_start_end_times(st, et)
-
-    # TODO: add test for _validate_hourly_fractions
 
 class TestStaticTimeProfiler_DefaultHourlyFractions(object):
-
 
     def test_one_day(self):
         st = datetime.datetime(2015, 1, 1, 0)
