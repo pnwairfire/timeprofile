@@ -31,6 +31,9 @@ def parse_args():
     parser.add_argument('-t', '--fire-type', default=feps.FireType.RX,
         help="ignition end time; default {}".format(feps.FireType.RX))
 
+    parser.add_argument('--skip-graph', help="Just list table of values",
+        action="store_true")
+
     parser.epilog = EXAMPLES_STRING
     parser.formatter_class = argparse.RawTextHelpFormatter
 
@@ -94,7 +97,8 @@ def main():
     args = parse_args()
     profiler = get_profiler(args)
     log_hourly_fractions(profiler)
-    plot(profiler)
+    if not args.skip_graph:
+        plot(profiler)
 
 if __name__ == "__main__":
     main()
