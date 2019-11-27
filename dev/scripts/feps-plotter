@@ -28,6 +28,8 @@ def parse_args():
         required=True)
     parser.add_argument('--ignition-start', help="ignition start time")
     parser.add_argument('--ignition-end', help="ignition end time")
+    parser.add_argument('-t', '--fire-type', default=feps.FireType.RX,
+        help="ignition end time; default {}".format(feps.FireType.RX))
 
     parser.epilog = EXAMPLES_STRING
     parser.formatter_class = argparse.RawTextHelpFormatter
@@ -55,7 +57,8 @@ def get_profiler(args):
 
     return feps.FepsTimeProfiler(s,e,
         local_ignition_start_time=ig_start,
-        local_ignition_end_time=ig_end)
+        local_ignition_end_time=ig_end,
+        fire_type=args.fire_type)
 
 def get_hours(profiler):
     return list(range(len(profiler.hourly_fractions['area_fraction'])))
