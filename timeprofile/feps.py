@@ -312,27 +312,3 @@ class FepsTimeProfiler(BaseTimeProfiler):
             lts_fractions.append(s)
 
         return lts_fractions
-
-
-"""
-If I'm understanding things correctly, given equation (19)
-
-    area_i = area_j + (area_k - area_j) * ( (hour_i - hour_j) / (hour_k - hour_j) )
-
-For 9am-noon ignition time, we
-
-    have hour_j == 9am
-    hour_k == 12pm,
-    area_j == 0
-    area_k == total_area
-
-which means (given total_area=1),
-
-
-    area_i = area_j + (1 - area_j) * ( (hour_i - hour_j) / (3)
-
-
-assigned to the active area for the day.  Then, given equation (12)
-
-consumption_rate_i = area_i - area_i-1
-"""
