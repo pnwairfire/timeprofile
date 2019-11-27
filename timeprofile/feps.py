@@ -66,6 +66,27 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
         getattr(self, '_compute_' + fire_type)()
 
+    @property
+    def start(self):
+        return self._start
+
+    @property
+    def end(self):
+        return self._end
+
+    @property
+    def ignition_start(self):
+        return self._ig_start
+
+    @property
+    def ignition_end(self):
+        return self._ig_end
+
+    @property
+    def hourly_fractions(self):
+        return self._hourly_fractions
+
+
     ## Initialization
 
     def _set_times(self, start, end, ig_start, ig_end, fire_type):
@@ -115,7 +136,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
         # TODO: make sure start / end times are reasonable for rx?
         sa = self._compute_smoldering_adjustment()
         area_fractions = self._compute_rx_area_fractions()
-        self.hourly_fractions = {
+        self._hourly_fractions = {
             "area_fraction": area_fractions,
             "flaming": self._normalize(
                 self._compute_rx_flaming(area_fractions)),
