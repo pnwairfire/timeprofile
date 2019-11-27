@@ -161,7 +161,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
         Note: partial ignition hours are supported
         """
         hourly_fractions = []
-        total_ig_seconds = (self._ig_start - self._ig_end).total_seconds()
+        total_ig_seconds = (self._ig_end - self._ig_start).total_seconds()
         hr = datetime.datetime(self._start.year, self._start.month,
             self._start.day)
         while hr < self._end:
