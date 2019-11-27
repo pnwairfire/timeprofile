@@ -70,8 +70,10 @@ def plot(profiler):
     pyplot.plot(hours, profiler.hourly_fractions['residual'],
         label='residual',color='g')
     pyplot.xlabel('Hour')
-    pyplot.ylabel('faction')
-    pyplot.title('FEPS curve for')
+    pyplot.ylabel('Fraction')
+    pyplot.title(('FEPS hourly fractions from {} to {}, given ignition '
+        'from {} to {}').format(profiler.start, profiler.end,
+        profiler.ignition_start, profiler.ignition_end))
     pyplot.legend()
     pyplot.show()
 
