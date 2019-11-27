@@ -7,6 +7,7 @@ import os
 import sys
 
 import matplotlib.pyplot as pyplot
+import tabulate
 
 root_dir = os.path.abspath(os.path.join(sys.path[0], '../../'))
 sys.path.insert(0, root_dir)
@@ -35,7 +36,7 @@ def parse_args():
 
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
         format='%(asctime)s %(levelname)s: %(message)s')
 
     logging.info(" Args:")
@@ -55,8 +56,11 @@ def get_profiler(args):
         local_ignition_start_time=ig_start,
         local_ignition_end_time=ig_end)
 
+def get_hours(profiler):
+    return list(range(len(profiler.hourly_fractions['area_fraction'])))
+
 def plot(profiler):
-    hours = list(range(len(profiler.hourly_fractions['area_fraction'])))
+    hours = get_hours(profiler)
 
     # matplotlib plot
     pyplot.plot(hours, profiler.hourly_fractions['flaming'],
@@ -71,9 +75,19 @@ def plot(profiler):
     pyplot.legend()
     pyplot.show()
 
+def log_hourly_fractions(profiler):
+    hours = ['hour'] + get_hours(profiler)
+    rows = [
+        ['flaming'] + profiler.hourly_fractions['flaming'],
+        ['smoldering'] + profiler.hourly_fractions['smoldering'],
+        ['residual'] + profiler.hourly_fractions['residual'],
+    ]
+    print(tabulate.tabulate(rows, headers=hours))
+
 def main():
     args = parse_args()
     profiler = get_profiler(args)
+    log_hourly_fractions(profiler)
     plot(profiler)
 
 if __name__ == "__main__":
