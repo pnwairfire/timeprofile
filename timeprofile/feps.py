@@ -160,7 +160,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
         Note: partial ignition hours are supported
         """
-        hourly_fractions = []
+        area_fractions = []
         total_ig_seconds = (self._ig_end - self._ig_start).total_seconds()
         hr = datetime.datetime(self._start.year, self._start.month,
             self._start.day)
@@ -169,10 +169,10 @@ class FepsTimeProfiler(BaseTimeProfiler):
             overlap_start = max(hr, self._ig_start)
             overlap_end = min(hr_end, self._ig_end)
             overlap_seconds = max(0, (overlap_end - overlap_start).total_seconds())
-            hourly_fractions.append(overlap_seconds / total_ig_seconds)
+            area_fractions.append(overlap_seconds / total_ig_seconds)
             hr += self.ONE_HOUR
 
-        return hourly_fractions
+        return area_fractions
 
     K_TFLAM1 = 4 / 3  # TODO: allow user to provide custom val
     K_TFLAM2 = 8  # TODO: allow user to provide custom val
