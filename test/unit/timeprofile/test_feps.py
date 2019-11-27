@@ -62,12 +62,6 @@ class TestFepsTimeProfiler_Rx(object):
                 local_ignition_end_time=ig_e, fire_type=FireType.RX)
         # TODO: check e_info.valeu.args[0]
 
-    def test_wf_not_yet_implemented(self):
-        s = datetime.datetime(2015, 1, 1, 9)
-        e = datetime.datetime(2015, 1, 1, 12)
-        with raises(NotImplementedError) as e_info:
-            profiler = FepsTimeProfiler(s, e, fire_type=FireType.WF)
-
 
     ## Valid Cases - Ignition not specified
 
