@@ -160,10 +160,10 @@ class FepsTimeProfiler(BaseTimeProfiler):
             area_i = (hour_i - hour_j) / (hour_k - hour_j)
             area_i = (hour_i - hour_j)^2 / (hour_k - hour_j)^2
 
-        Also, since we want, for each hour, the area consumed between hour i
-        and hour i+1, equation (21) becomes
-
-            consumed_i = area_i+1 - area_i
+        Where area_i is inclusive of the hour starting at hour 1
+        (e.g. if ignition starts is at 9am, area_9am is
+        hour_10am - hour_9am == 1h; if ignition starts is at 9:30am,
+        area_9am is hour_10am - hour_9:30am == 30m)
 
         For Rx, this basically means that the area consumption is divided
         evenly over the hours of ignition for.  For wf, the growth is
@@ -186,19 +186,18 @@ class FepsTimeProfiler(BaseTimeProfiler):
             overlap_seconds = max(0, (overlap_end - overlap_start).total_seconds())
             cumulative_seconds += overlap_seconds
             if self._fire_type == FireType.RX:
-                cumulative_area.append(overlap_seconds / total_ig_seconds)
+                cumulative_area.append(cumulative_seconds / total_ig_seconds)
             else:
                 cumulative_area.append(
-                    math.pow(overlap_seconds, 2) / math.pow(total_ig_seconds, 2))
+                    math.pow(cumulative_seconds, 2) / math.pow(total_ig_seconds, 2))
             hr += self.ONE_HOUR
 
         self._area_fractions = []
         num_hours = len(cumulative_area)
         for i in range(num_hours):
-            next_val = cumulative_area[i+1] if i < num_hours-1 else 1.0
-            a = next_val = cumulative_area[i]
+            prev_val = cumulative_area[i-1] if i > 0 else 0.0
+            a = cumulative_area[i] - prev_val
             self._area_fractions.append(a)
-
 
     def _compute_hourly_fractions(self):
         # TODO: make sure start / end times are reasonable for rx?
