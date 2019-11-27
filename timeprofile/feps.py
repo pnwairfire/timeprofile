@@ -115,7 +115,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
         # TODO: make sure start / end times are reasonable for rx?
         sa = self._compute_smoldering_adjustment()
         area_fractions = self._compute_rx_area_fractions()
-        hourly_fractions = {
+        self.hourly_fractions = {
             "area_fraction": area_fractions,
             "flaming": self._normalize(
                 self._compute_rx_flaming(area_fractions)),
