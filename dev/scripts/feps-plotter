@@ -26,10 +26,8 @@ def parse_args():
         required=True)
     parser.add_argument('-e', '--end', help="activity window end time",
         required=True)
-    parser.add_argument('--ignition-start', help="ignition start time",
-        required=True)
-    parser.add_argument('--ignition-end', help="ignition end time",
-        required=True)
+    parser.add_argument('--ignition-start', help="ignition start time")
+    parser.add_argument('--ignition-end', help="ignition end time")
 
     parser.epilog = EXAMPLES_STRING
     parser.formatter_class = argparse.RawTextHelpFormatter
@@ -50,8 +48,11 @@ DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 def get_profiler(args):
     s = datetime.datetime.strptime(args.start, DATETIME_FORMAT)
     e = datetime.datetime.strptime(args.end, DATETIME_FORMAT)
-    ig_start = datetime.datetime.strptime(args.ignition_start, DATETIME_FORMAT)
-    ig_end = datetime.datetime.strptime(args.ignition_end, DATETIME_FORMAT)
+    ig_start = (args.ignition_start and
+        datetime.datetime.strptime(args.ignition_start, DATETIME_FORMAT))
+    ig_end = (args.ignition_end and
+        datetime.datetime.strptime(args.ignition_end, DATETIME_FORMAT))
+
     return feps.FepsTimeProfiler(s,e,
         local_ignition_start_time=ig_start,
         local_ignition_end_time=ig_end)
