@@ -22,6 +22,11 @@ Notes on modifications made to the equstions in Anderson et. al.:
    It's up to the user to specify a large enough activity window to avoid
    cutting off a significant portion of the graph (e.g. midnight to midnight
    for a 9am-12pm ignition).
+
+
+TODO: Refactor FepsTimeProfiler to optionally accept as input all fields
+  (total consumption, duff consumption, hourly relative humidity, etc)
+  mentioned in the equations in Anderson et. al.
 """
 
 import datetime
