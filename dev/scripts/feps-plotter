@@ -70,12 +70,14 @@ def plot(profiler):
     hours = get_hours(profiler)
 
     # matplotlib plot
-    pyplot.plot(hours, profiler.hourly_fractions['flaming'],
-        label='flaming',color='r')
-    pyplot.plot(hours, profiler.hourly_fractions['smoldering'],
-        label='smoldering',color='r')
+    pyplot.plot(hours, profiler.hourly_fractions['area_fraction'],
+        label='area_fraction',color='black')
     pyplot.plot(hours, profiler.hourly_fractions['residual'],
-        label='residual',color='g')
+        label='residual',color='magenta')
+    pyplot.plot(hours, profiler.hourly_fractions['smoldering'],
+        label='smoldering',color='blue')
+    pyplot.plot(hours, profiler.hourly_fractions['flaming'],
+        label='flaming',color='red')
     pyplot.xlabel('Hour')
     pyplot.ylabel('Fraction')
     pyplot.title(('FEPS hourly fractions from {} to {}, given ignition '
@@ -87,6 +89,7 @@ def plot(profiler):
 def log_hourly_fractions(profiler):
     hours = ['hour'] + get_hours(profiler)
     rows = [
+        ['area_fraction'] + profiler.hourly_fractions['area_fraction'],
         ['flaming'] + profiler.hourly_fractions['flaming'],
         ['smoldering'] + profiler.hourly_fractions['smoldering'],
         ['residual'] + profiler.hourly_fractions['residual'],
