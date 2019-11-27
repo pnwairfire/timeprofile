@@ -117,12 +117,19 @@ class FepsTimeProfiler(BaseTimeProfiler):
         area_fractions = self._compute_rx_area_fractions()
         hourly_fractions = {
             "area_fraction": area_fractions,
-            "flaming": self._compute_rx_flaming(area_fractions),
-            "smoldering": self._compute_rx_short_term_smoldering(area_fractions, sa),
-            "residual": self._compute_rx_long_term_smoldering(area_fractions, sa)
+            "flaming": self._normalize(
+                self._compute_rx_flaming(area_fractions)),
+            "smoldering": self._normalize(
+                self._compute_rx_short_term_smoldering(area_fractions, sa)),
+            "residual": self._normalize(
+                self._compute_rx_long_term_smoldering(area_fractions, sa))
         }
-        return hourly_fractions
 
+        # TODO: normalize to make sure each set adds up to one
+
+    def _normalize(self, fractions):
+        total = sum(fractions)
+        return [e / total for e in fractions]
 
     U_b = 3
     RH_b = 60
