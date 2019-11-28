@@ -53,6 +53,8 @@ class FepsTimeProfiler(BaseTimeProfiler):
     DEFAULT_DUFF_MOISTURE_CONTENT = 70
 
     def __init__(self, local_start_time, local_end_time,
+            total_above_ground_consumption,
+            total_below_ground_consumption,
             local_ignition_start_time=None, local_ignition_end_time=None,
             fire_type=FireType.RX, relative_humidity=None, wind_speed=None,
             duff_moisture_content=None):
@@ -61,6 +63,11 @@ class FepsTimeProfiler(BaseTimeProfiler):
             local_ignition_start_time, local_ignition_end_time)
 
         self._set_fire_type(fire_type)
+
+        self._total_above_ground_consumption = total_above_ground_consumption
+        self._total_below_ground_consumption = total_below_ground_consumption
+        self._total_consumption = (self._total_above_ground_consumption +
+            self._total_below_ground_consumption)
 
         self._relative_humidity = (relative_humidity
             if relative_humidity is not None else self.DEFAULT_RELATIVE_HUMIDITY)
@@ -229,6 +236,10 @@ class FepsTimeProfiler(BaseTimeProfiler):
             * ((100 / self._relative_humidity) / self.RH_b))
 
 
+    K_AGI = 1
+    C_TI = 10
+    K_CAG = 0.5
+    K_CBG = 0.2
     K_TFLAM1 = 4 / 3  # TODO: allow user to provide custom val
     K_TFLAM2 = 8  # TODO: allow user to provide custom val
     N_TFLAM = 0.5  # TODO: allow user to provide custom val
@@ -244,14 +255,15 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
             CR_f_i = AR_i * (Inv_f / 100) * C_f * (1 - Decay_f) + (CR_f_i-1 * Decay_f)
 
-        Since this computes absolute consumption values as opposed to relative
-        fractions, which is what we want, we can remove (Inv_f / 100) * C_f
-        to get:
-
-            CR_f_i = AR_i * (1 - Decay_f) + (CR_f_i-1 * Decay_f)
-
         Where:
 
+            Inv_f = 100 * (1 - k_AGI * e^(-C_AG / C_TI))
+            k_AGI (Flame involvement sensitivity coefficient) = 1
+            C_AG = total above ground consumption
+            C_TI (Consumption threshold for total flame involvement) = 10
+            C_f = k_CAG * C_AG + k_CBG * C_BG
+            k_CAG (Above ground flaming phase consumption coefficient) = 0.5
+            k_CBG (Below ground flaming phase consumption coefficient) = 0.2
             Decay_f = 1 / e^(1/TFLAM)
             TFLAM = K_TFLAM1 * K_TFLAM2 * (D_f)^N_TFLAM / 60
             D_f = (C_f / B_f)^(1/2)
@@ -267,10 +279,17 @@ class FepsTimeProfiler(BaseTimeProfiler):
         so that DECAY_f, TFLAM, and D_f can be defined as constants, above.
         """
         flaming_fractions = []
+
+        inv_f = 100 * (1 - self.K_AGI * math.pow(
+            math.e, -self._total_above_ground_consumption / self.C_TI))
+        c_f = (self.K_CAG * self._total_above_ground_consumption +
+            self.K_CBG * self._total_below_ground_consumption)
+
         for i, a in enumerate(self._area_fractions):
             prev = flaming_fractions[i-1] if i > 0 else 0.0
-            f = a * (1 - self.DECAY_f) + prev * self.DECAY_f
+            f = a * (inv_f / 100) * c_f * (1 - self.DECAY_f) + prev * self.DECAY_f
             flaming_fractions.append(f)
+
         return flaming_fractions
 
 
