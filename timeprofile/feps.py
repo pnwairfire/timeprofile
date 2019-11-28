@@ -45,12 +45,35 @@ class FireType(object):
 
 class FepsTimeProfiler(BaseTimeProfiler):
 
-    # TODO: do we need fire_type?  can be inferred as rx if ignition times
-    #   are defined
+    ## Constants
+
+    # for smoldiering adjustment
+    U_b = 3  # TODO: allow user to provide custom val
+    RH_b = 60  # TODO: allow user to provide custom val
+
+    # for computing flaming phase consumption
+    K_CAG = 0.5  # TODO: allow user to provide custom val
+    K_CBG = 0.2  # TODO: allow user to provide custom val
+
+    # for flaming fractions
+    K_AGI = 1  # TODO: allow user to provide custom val
+    C_TI = 10  # TODO: allow user to provide custom val
+    K_TFLAM1 = 4 / 3  # TODO: allow user to provide custom val
+    K_TFLAM2 = 8  # TODO: allow user to provide custom val
+    N_TFLAM = 0.5  # TODO: allow user to provide custom val
+    B_f = 20  # TODO: allow user to provide custom val
+    D_f = math.sqrt(1/B_f)
+    TFLAM = K_TFLAM1 * K_TFLAM2 * math.pow(D_f, N_TFLAM) / 60
+    DECAY_f = 1 / math.pow(math.e, (1/TFLAM))
+
 
     DEFAULT_RELATIVE_HUMIDITY = 65
     DEFAULT_WIND_SPEED = 5
     DEFAULT_DUFF_MOISTURE_CONTENT = 70
+
+
+    # TODO: do we need fire_type?  can be inferred as rx if ignition times
+    #   are defined
 
     def __init__(self, local_start_time, local_end_time,
             total_above_ground_consumption,
@@ -78,8 +101,11 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
         # fire type only comes into play for computing area fractions
         self._compute_area_fractions()
-
+        self._compute_flaming_phase_involvement()
+        self._compute_flaming_phase_consumption()
+        self._compute_smoldering_adjustment()
         self._compute_hourly_fractions()
+
 
     @property
     def start(self):
@@ -154,6 +180,31 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
         self._fire_type = fire_type
 
+    ## Computations
+
+    def _compute_flaming_phase_involvement(self):
+        self._inv_f = 100 * (1 - self.K_AGI * math.pow(
+            math.e, -self._total_above_ground_consumption / self.C_TI))
+
+    def _compute_flaming_phase_consumption(self):
+        """Computes flaming phase consumption, C_f
+
+        where
+
+            C_f = k_CAG * C_AG + k_CBG * C_BG
+            k_CAG (Above ground flaming phase consumption coefficient) = 0.5
+            k_CBG (Below ground flaming phase consumption coefficient) = 0.2
+        """
+        self._c_f = (self.K_CAG * self._total_above_ground_consumption +
+            self.K_CBG * self._total_below_ground_consumption)
+
+
+    def _compute_smoldering_adjustment(self):
+        # TODO: refactor class to input hourly relative humitidy?
+        self._smoldering_adjustment = (
+            math.floor(math.pow((self._wind_speed / self.U_b), 0.5))
+            * ((100 / self._relative_humidity) / self.RH_b))
+
     def _compute_area_fractions(self):
         """Computes the hourly area consumption rate based on equations
         (19), (20), and (21) in Anderson et. al.  Equation (19) and (20)
@@ -213,12 +264,11 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
     def _compute_hourly_fractions(self):
         # TODO: make sure start / end times are reasonable for rx?
-        sa = self._compute_smoldering_adjustment()
         self._hourly_fractions = {
             "area_fraction": self._area_fractions,
             "flaming": self._normalize(self._compute_flaming()),
-            "smoldering": self._normalize(self._compute_short_term_smoldering(sa)),
-            "residual": self._normalize(self._compute_long_term_smoldering(sa))
+            "smoldering": self._normalize(self._compute_short_term_smoldering()),
+            "residual": self._normalize(self._compute_long_term_smoldering())
         }
 
         # TODO: normalize to make sure each set adds up to one
@@ -227,26 +277,6 @@ class FepsTimeProfiler(BaseTimeProfiler):
         total = sum(fractions)
         return [e / total for e in fractions]
 
-    U_b = 3
-    RH_b = 60
-
-    def _compute_smoldering_adjustment(self):
-        # TODO: refactor class to input hourly relative humitidy?
-        return (math.floor(math.pow((self._wind_speed / self.U_b), 0.5))
-            * ((100 / self._relative_humidity) / self.RH_b))
-
-
-    K_AGI = 1
-    C_TI = 10
-    K_CAG = 0.5
-    K_CBG = 0.2
-    K_TFLAM1 = 4 / 3  # TODO: allow user to provide custom val
-    K_TFLAM2 = 8  # TODO: allow user to provide custom val
-    N_TFLAM = 0.5  # TODO: allow user to provide custom val
-    B_f = 20  # TODO: allow user to provide custom val
-    D_f = math.sqrt(1/B_f)
-    TFLAM = K_TFLAM1 * K_TFLAM2 * math.pow(D_f, N_TFLAM) / 60
-    DECAY_f = 1 / math.pow(math.e, (1/TFLAM))
 
     def _compute_flaming(self):
         """Computes hourly flaming phase consumption, as defined by
@@ -261,9 +291,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
             k_AGI (Flame involvement sensitivity coefficient) = 1
             C_AG = total above ground consumption
             C_TI (Consumption threshold for total flame involvement) = 10
-            C_f = k_CAG * C_AG + k_CBG * C_BG
-            k_CAG (Above ground flaming phase consumption coefficient) = 0.5
-            k_CBG (Below ground flaming phase consumption coefficient) = 0.2
+            C_f = Flaming phase consumption (see _compute_flaming_phase_consumption)
             Decay_f = 1 / e^(1/TFLAM)
             TFLAM = K_TFLAM1 * K_TFLAM2 * (D_f)^N_TFLAM / 60
             D_f = (C_f / B_f)^(1/2)
@@ -280,14 +308,12 @@ class FepsTimeProfiler(BaseTimeProfiler):
         """
         flaming_fractions = []
 
-        inv_f = 100 * (1 - self.K_AGI * math.pow(
-            math.e, -self._total_above_ground_consumption / self.C_TI))
-        c_f = (self.K_CAG * self._total_above_ground_consumption +
-            self.K_CBG * self._total_below_ground_consumption)
+        # TODO: come up with appropriate name for the following variable
+        temp = (self._inv_f / 100) * self._c_f * (1 - self.DECAY_f)
 
         for i, a in enumerate(self._area_fractions):
             prev = flaming_fractions[i-1] if i > 0 else 0.0
-            f = a * (inv_f / 100) * c_f * (1 - self.DECAY_f) + prev * self.DECAY_f
+            f = a * temp + prev * self.DECAY_f
             flaming_fractions.append(f)
 
         return flaming_fractions
@@ -301,21 +327,19 @@ class FepsTimeProfiler(BaseTimeProfiler):
     EDR = K_EDR1 * K_EDR2 * math.pow(D_STS, N_EDR) / 60
     DECAY_STS = 1 / math.pow(math.e, (1/EDR))
 
-    def _compute_short_term_smoldering(self, sa):
+    def _compute_short_term_smoldering(self):
         """Computes hourly smoldering (i.e. Short Term Smoldering, STS)
         phase consumption, as defined by a modification of equation (28)
         in Anderson et. al.  The original is as follows
 
             CR_STS_i = SA * AR_i * (Inv_STS / 100) * C_STS * (1 - Decay_s) + (CR_STS_i-1 * Decay_s)
 
-        As with flaming, since this computes absolute consumption values as
-        opposed to relative fractions, which is wwhat we actually want,
-        we can remove (Inv_STS / 100) * C_STS.
-
-            CR_STS_i = SA * AR_i  * (1 - Decay_s) + (CR_STS_i-1 * Decay_s)
-
         Where
 
+            Inv_STS = Inv_f
+            C_STS = min(C_f, C_total - C_f)
+            C_f = Flaming phase consumption (see _compute_flaming_phase_consumption)
+            C_total = total_consumption
             Decay_s = 1 / e^(1/EDR)
             EDR = K_EDR1 * K_EDR2 * (D_STS)^N_EDR / 60
             D_STS = C_STS / B_STS
@@ -338,9 +362,13 @@ class FepsTimeProfiler(BaseTimeProfiler):
         """
         sts_fractions = []
 
+        # TODO: come up with appropriate name for the following variable
+        c_sts = min(self._c_f, self._total_consumption - self._c_f)
+        temp = self._smoldering_adjustment * (self._inv_f / 100) * c_sts * (1 - self.DECAY_STS)
+
         for i, a in enumerate(self._area_fractions):
             prev = sts_fractions[i-1] if i > 0 else 0.0
-            s = sa * a * (1 - self.DECAY_STS) + (prev * self.DECAY_STS)
+            s = temp * a + (prev * self.DECAY_STS)
             sts_fractions.append(s)
 
         return sts_fractions
@@ -349,7 +377,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
     M_DBM = 130  # TODO: allow user to provide custom val
     K_RDR = 12  # TODO: allow user to provide custom val
 
-    def _compute_long_term_smoldering(self, sa):
+    def _compute_long_term_smoldering(self):
         """Computes hourly residual (i.e. Long Term Smoldering, LTS)
         phase consumption, as defined by a modification of equation (29)
         in Anderson et. al.  The original is as follows
@@ -379,10 +407,12 @@ class FepsTimeProfiler(BaseTimeProfiler):
             self._duff_moisture_content / self.M_DBM))
         rdr = self.K_RDR * inv_lts / ((1 - math.pow(math.e,-1)) / 100)
         decay_l = 1 / math.pow(math.e, 1 / rdr)
+        # TODO: come up with appropriate name for the following variable
+        temp = self._smoldering_adjustment * (inv_lts / 100) * (1 - decay_l)
 
         for i, a in enumerate(self._area_fractions):
             prev = lts_fractions[i-1] if i > 0 else 0.0
-            s = sa * a * (inv_lts / 100) * (1 - decay_l) + (prev * decay_l)
+            s = temp * a + (prev * decay_l)
             lts_fractions.append(s)
 
         return lts_fractions
