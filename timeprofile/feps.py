@@ -64,6 +64,7 @@ class MoistureCategoryFactors(object):
     def get(self, fuel_category):
         return self._get(self._factors, fuel_category, 'fuel')
     __call__ = get
+    __getitem__ = get
 
     def _get(self, d, key, label):
         k = key and key.lower()

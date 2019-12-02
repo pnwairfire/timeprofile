@@ -51,14 +51,22 @@ class TestMoistureCategoryFactors(object):
             mcf(None)
         assert e_info.value.args[0] == "Invalid fuel category: None"
         with raises(ValueError) as e_info:
+            mcf[None]
+        assert e_info.value.args[0] == "Invalid fuel category: None"
+
+        with raises(ValueError) as e_info:
             mcf.get('fuels')
         assert e_info.value.args[0] == "Invalid fuel category: fuels"
         with raises(ValueError) as e_info:
             mcf('fuels')
         assert e_info.value.args[0] == "Invalid fuel category: fuels"
+        with raises(ValueError) as e_info:
+            mcf['fuels']
+        assert e_info.value.args[0] == "Invalid fuel category: fuels"
 
         assert mcf.get('canopy') == 0.5
         assert mcf('canopy') == 0.5
+        assert mcf['canopy'] == 0.5
 
 
 class TestFepsTimeProfiler_Rx(object):
