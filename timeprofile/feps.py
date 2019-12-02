@@ -34,6 +34,10 @@ import math
 
 from . import BaseTimeProfiler, InvalidStartEndTimesError
 
+__all__ = [
+    'FireType', 'MoistureCategoryFactors', 'FepsTimeProfiler'
+]
+
 
 class FireType(object):
 
@@ -41,6 +45,34 @@ class FireType(object):
     WF = 'wf'
 
     VALID_FIRE_TYPES = (RX, WF)
+
+
+class MoistureCategoryFactors(object):
+
+    _FACTORS = {
+        "verydry": {'canopy': 0.33, 'shrub': 0.25, 'grass': 0.125, 'duff': 0.33},
+        "dry": {'canopy': 0.5, 'shrub': 0.33, 'grass': 0.25, 'duff': 0.5},
+        "moderate": {'canopy': 1, 'shrub': 0.5, 'grass': 1, 'duff': 1},
+        "moist": {'canopy': 2, 'shrub': 1, 'grass': 2, 'duff': 2},
+        "wet": {'canopy': 4, 'shrub': 2, 'grass': 4, 'duff': 4},
+        "verywet": {'canopy': 5, 'shrub': 4, 'grass': 5, 'duff': 5 }
+    }
+
+    def __init__(self, moisture_category):
+        self._factors = self._get(self._FACTORS, moisture_category, 'moisture')
+
+    def get(self, fuel_category):
+        return self._get(self._factors, fuel_category, 'fuel')
+    __call__ = get
+
+    def _get(self, d, key, label):
+        k = key and key.lower()
+
+        if k not in d:
+            raise ValueError(
+                "Invalid {} category: {}".format(label, key))
+
+        return d[k]
 
 
 class FepsTimeProfiler(BaseTimeProfiler):

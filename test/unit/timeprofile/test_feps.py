@@ -7,7 +7,10 @@ from numpy.testing import assert_approx_equal
 from py.test import raises
 
 from timeprofile.feps import (
-    FepsTimeProfiler, FireType, InvalidStartEndTimesError
+    MoistureCategoryFactors,
+    FepsTimeProfiler,
+    FireType,
+    InvalidStartEndTimesError
 )
 
 def assert_approximately_equal(expected, actual):
@@ -23,6 +26,40 @@ def assert_approximately_equal(expected, actual):
         assert_approx_equal(actual, expected, significant=8)  # arbitrarily chose 8
     else:
         assert expected == actual
+
+
+class TestMoistureCategoryFactors(object):
+
+    def test_invalid_moisture_category(self):
+        with raises(ValueError) as e_info:
+            MoistureCategoryFactors(None)
+        assert e_info.value.args[0] == "Invalid moisture category: None"
+
+        with raises(ValueError) as e_info:
+            MoistureCategoryFactors('sdf')
+        assert e_info.value.args[0] == "Invalid moisture category: sdf"
+
+    def test_valid_moisture_category(self):
+        mcf = MoistureCategoryFactors('Dry')
+        mcf2 = MoistureCategoryFactors('dry') # lowercase works too
+        assert mcf._factors == mcf2._factors == {'canopy': 0.5, 'shrub': 0.33, 'grass': 0.25, 'duff': 0.5}
+
+        with raises(ValueError) as e_info:
+            mcf.get(None)
+        assert e_info.value.args[0] == "Invalid fuel category: None"
+        with raises(ValueError) as e_info:
+            mcf(None)
+        assert e_info.value.args[0] == "Invalid fuel category: None"
+        with raises(ValueError) as e_info:
+            mcf.get('fuels')
+        assert e_info.value.args[0] == "Invalid fuel category: fuels"
+        with raises(ValueError) as e_info:
+            mcf('fuels')
+        assert e_info.value.args[0] == "Invalid fuel category: fuels"
+
+        assert mcf.get('canopy') == 0.5
+        assert mcf('canopy') == 0.5
+
 
 class TestFepsTimeProfiler_Rx(object):
 
