@@ -137,7 +137,10 @@ def main():
     profiler = get_profiler(args)
     log_hourly_fractions(profiler)
     if not args.skip_graph:
-        plot(profiler)
+        try:
+            plot(profiler, args.graph_type)
+        except KeyboardInterrupt as e:
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
