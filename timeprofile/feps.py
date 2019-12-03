@@ -168,10 +168,12 @@ class FepsTimeProfiler(BaseTimeProfiler):
     @property
     def start(self):
         return self._start
+    start_hour = start
 
     @property
     def end(self):
         return self._end
+    end_hour = end
 
     @property
     def ignition_start(self):
@@ -460,7 +462,6 @@ class FepsTimeProfiler(BaseTimeProfiler):
             k_RDR = 12
         """
         lts_fractions = []
-
 
         inv_lts = 100 / math.pow(math.e, self.K_LTI * (
             self._duff_moisture_content / self.M_DBM))
