@@ -124,7 +124,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
     DEFAULT_RELATIVE_HUMIDITY = 65
     DEFAULT_WIND_SPEED = 5
-    DEFAULT_DUFF_MOISTURE_CONTENT = 70
+    DEFAULT_DUFF_MOISTURE_CONTENT = M_DBM #
 
 
     # TODO: do we need fire_type?  can be inferred as rx if ignition times
