@@ -42,6 +42,8 @@ def parse_args():
         default=feps.MoistureCategory.MODERATE,
         help="ignition end time; default {}".format(
             feps.MoistureCategory.MODERATE))
+    parser.add_argument('--graph-type', help="'bar' or 'plot'; default 'plot'",
+        default='plot')
 
     parser.add_argument('--skip-graph', help="Just list table of values",
         action="store_true")
@@ -82,18 +84,36 @@ def get_profiler(args):
 def get_hours(profiler):
     return list(range(len(profiler.hourly_fractions['area_fraction'])))
 
-def plot(profiler):
+def draw_bars(hours, profiler):
+    width = 0.1
+    pyplot.bar([e-width for e in hours], profiler.hourly_fractions['area_fraction'],
+        width=width, label='area_fraction',color='black')
+    pyplot.bar([e for e in hours], profiler.hourly_fractions['flaming'],
+        width=width, label='flaming',color='red')
+    pyplot.bar([e+width for e in hours], profiler.hourly_fractions['smoldering'],
+        width=width, label='smoldering',color='blue')
+    pyplot.bar([e+2*width for e in hours], profiler.hourly_fractions['residual'],
+        width=width, label='residual',color='green')
+
+def draw_plots(hours, profiler):
+    width = 0.1
+    pyplot.plot(hours, profiler.hourly_fractions['area_fraction'],
+        label='area_fraction',color='black')
+    pyplot.plot(hours, profiler.hourly_fractions['flaming'],
+        label='flaming',color='red')
+    pyplot.plot(hours, profiler.hourly_fractions['smoldering'],
+        label='smoldering',color='blue')
+    pyplot.plot(hours, profiler.hourly_fractions['residual'],
+        label='residual',color='green')
+
+def plot(profiler, graph_type):
     hours = get_hours(profiler)
 
     # matplotlib plot
-    pyplot.plot(hours, profiler.hourly_fractions['area_fraction'],
-        label='area_fraction',color='black')
-    pyplot.plot(hours, profiler.hourly_fractions['residual'],
-        label='residual',color='magenta')
-    pyplot.plot(hours, profiler.hourly_fractions['smoldering'],
-        label='smoldering',color='blue')
-    pyplot.plot(hours, profiler.hourly_fractions['flaming'],
-        label='flaming',color='red')
+    f = globals().get('draw_{}s'.format(graph_type))
+    if not f:
+        raise ValueError("Invalid graph type: '{}".format(graph_type))
+    f(hours, profiler)
     pyplot.xlabel('Hour')
     pyplot.ylabel('Fraction')
     pyplot.title(('FEPS hourly fractions from {} to {}, given ignition '
