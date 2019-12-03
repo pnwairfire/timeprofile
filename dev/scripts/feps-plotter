@@ -85,18 +85,18 @@ def get_hours(profiler):
     return list(range(len(profiler.hourly_fractions['area_fraction'])))
 
 def draw_bars(hours, profiler):
-    width = 0.1
-    pyplot.bar([e-width for e in hours], profiler.hourly_fractions['area_fraction'],
+    width = 0.2
+    half_width = width / 2
+    pyplot.bar([e-3*half_width for e in hours], profiler.hourly_fractions['area_fraction'],
         width=width, label='area_fraction',color='black')
-    pyplot.bar([e for e in hours], profiler.hourly_fractions['flaming'],
+    pyplot.bar([e-half_width for e in hours], profiler.hourly_fractions['flaming'],
         width=width, label='flaming',color='red')
-    pyplot.bar([e+width for e in hours], profiler.hourly_fractions['smoldering'],
+    pyplot.bar([e+half_width for e in hours], profiler.hourly_fractions['smoldering'],
         width=width, label='smoldering',color='blue')
-    pyplot.bar([e+2*width for e in hours], profiler.hourly_fractions['residual'],
+    pyplot.bar([e+3*half_width for e in hours], profiler.hourly_fractions['residual'],
         width=width, label='residual',color='green')
 
 def draw_plots(hours, profiler):
-    width = 0.1
     pyplot.plot(hours, profiler.hourly_fractions['area_fraction'],
         label='area_fraction',color='black')
     pyplot.plot(hours, profiler.hourly_fractions['flaming'],
