@@ -458,11 +458,14 @@ class FepsTimeProfiler(BaseTimeProfiler):
             C_f = flaming phase consumption (see _compute_flaming_phase_consumption)
             C_STS = STS phase consumption (see _compute_sts_phase_consumption)
             Decay_l = 1 / e^(1/RDR)
-            RDR = k_RDR * Inv_LTS / [(1 - e^(-1)) / 100]
+            RDR = k_RDR * Inv_LTS / (1 - e^(-1)) / 100
             k_RDR = 12
-        """
-        lts_fractions = []
 
+        Note that
+            RDR = k_RDR * Inv_LTS / (1 - e^(-1)) / 100
+                = (k_RDR * Inv_LTS / (1 - e^(-1))) / 100
+                = (k_RDR * Inv_LTS) / ((1 - e^(-1)) * 100)
+        """
         inv_lts = 100 / math.pow(math.e, self.K_LTI * (
             self._duff_moisture_content / self.M_DBM))
         lc_d = 100 * math.pow(1 - math.pow(math.e, -1),
@@ -470,11 +473,12 @@ class FepsTimeProfiler(BaseTimeProfiler):
         c_duff = lc_d * self._duff_fuel_load / 100
         c_lts = max(self._total_consumption - self._c_f - self._c_sts,
             (self._duff_fuel_load * inv_lts / 100) - c_duff)
-        rdr = self.K_RDR * inv_lts / ((1 - math.pow(math.e,-1)) / 100)
+        rdr = (self.K_RDR * inv_lts) / ((1 - math.pow(math.e,-1)) * 100)
         decay_l = 1 / math.pow(math.e, 1 / rdr)
         # TODO: come up with appropriate name for the following variable
         temp = self._smoldering_adjustment * (inv_lts / 100) * c_lts * (1 - decay_l)
 
+        lts_fractions = []
         for i, a in enumerate(self._area_fractions):
             prev = lts_fractions[i-1] if i > 0 else 0.0
             s = temp * a + (prev * decay_l)
