@@ -28,14 +28,14 @@ def parse_args():
         required=True)
     parser.add_argument('-e', '--end', help="activity window end time",
         required=True)
-    parser.add_argument('-d', '--duff-fuel-load', type=float,
-        help="duff fuel load, in tons", required=True)
-    parser.add_argument('-a', '--total-above-ground-consumption', type=float,
-        help="total above ground consumption, in tons", required=True)
-    parser.add_argument('-b', '--total-below-ground-consumption', type=float,
-        help="total below ground consumption, in tons", required=True)
     parser.add_argument('--ignition-start', help="ignition start time")
     parser.add_argument('--ignition-end', help="ignition end time")
+    parser.add_argument('-d', '--duff-fuel-load',
+        type=float, help="duff fuel load, in tons")
+    parser.add_argument('-a', '--total-above-ground-consumption',
+        type=float, help="total above ground consumption, in tons")
+    parser.add_argument('-b', '--total-below-ground-consumption',
+        type=float, help="total below ground consumption, in tons")
     parser.add_argument('-t', '--fire-type', default=feps.FireType.RX,
         help="ignition end time; default {}".format(feps.FireType.RX))
     parser.add_argument('-m', '--moisture-category',
@@ -73,12 +73,12 @@ def get_profiler(args):
         datetime.datetime.strptime(args.ignition_end, DATETIME_FORMAT))
 
     return feps.FepsTimeProfiler(s, e,
-        args.duff_fuel_load,
-        args.total_above_ground_consumption,
-        args.total_below_ground_consumption,
         local_ignition_start_time=ig_start,
         local_ignition_end_time=ig_end,
         fire_type=args.fire_type,
+        duff_fuel_load=args.duff_fuel_load,
+        total_above_ground_consumption=args.total_above_ground_consumption,
+        total_below_ground_consumption=args.total_below_ground_consumption,
         moisture_category=args.moisture_category)
 
 def get_hours(profiler):

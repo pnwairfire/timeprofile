@@ -122,19 +122,30 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
     ## Defaults for input fields
 
-    DEFAULT_RELATIVE_HUMIDITY = 65
-    DEFAULT_WIND_SPEED = 5
-    DEFAULT_DUFF_MOISTURE_CONTENT = M_DBM #
+    # TODO: better defaults values
+    INPUT_DEFAULTS = {
+        "duff_fuel_load": 1,
+        "total_above_ground_consumption": 1,
+        "total_below_ground_consumption": 1,
+        "relative_humidity": 65,
+        "wind_speed": 5,
+        "duff_moisture_content": M_DBM
+    }
 
 
     # TODO: do we need fire_type?  can be inferred as rx if ignition times
     #   are defined
 
-    def __init__(self, local_start_time, local_end_time, duff_fuel_load,
-            total_above_ground_consumption, total_below_ground_consumption,
-            local_ignition_start_time=None, local_ignition_end_time=None,
-            fire_type=FireType.RX, moisture_category='moderate',
-            relative_humidity=None, wind_speed=None,
+    def __init__(self, local_start_time, local_end_time,
+            local_ignition_start_time=None,
+            local_ignition_end_time=None,
+            fire_type=FireType.RX,
+            duff_fuel_load=None,
+            total_above_ground_consumption=None,
+            total_below_ground_consumption=None,
+            moisture_category='moderate',
+            relative_humidity=None,
+            wind_speed=None,
             duff_moisture_content=None):
 
         self._set_times(local_start_time, local_end_time,
@@ -143,18 +154,13 @@ class FepsTimeProfiler(BaseTimeProfiler):
         self._set_fire_type(fire_type)
         self._set_moisture_category_factors(moisture_category)
 
-        self._duff_fuel_load = duff_fuel_load
-        self._total_above_ground_consumption = total_above_ground_consumption
-        self._total_below_ground_consumption = total_below_ground_consumption
+        for k in self.INPUT_DEFAULTS:
+            val = locals().get(k)
+            val = val if val is not None else self.INPUT_DEFAULTS[k]
+            setattr(self, '_' + k, val)
+
         self._total_consumption = (self._total_above_ground_consumption +
             self._total_below_ground_consumption)
-
-        self._relative_humidity = (relative_humidity
-            if relative_humidity is not None else self.DEFAULT_RELATIVE_HUMIDITY)
-        self._wind_speed = (wind_speed
-            if wind_speed is not None else self.DEFAULT_WIND_SPEED)
-        self._duff_moisture_content = (duff_moisture_content
-            if duff_moisture_content is not None else self.DEFAULT_DUFF_MOISTURE_CONTENT)
 
         # fire type only comes into play for computing area fractions
         self._compute_area_fractions()

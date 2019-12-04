@@ -76,35 +76,26 @@ class TestFepsTimeProfiler_Rx(object):
     def test_start_after_end(self):
         s = datetime.datetime(2015, 1, 1, 12)
         e = datetime.datetime(2015, 1, 1, 10)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
         with raises(InvalidStartEndTimesError) as e_info:
-            profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+            profiler = FepsTimeProfiler(s, e,
                 fire_type=FireType.RX)
         # TODO: check e_info.valeu.args[0]
 
     def test_start_same_as_end(self):
         s = datetime.datetime(2015, 1, 1, 12)
         e = datetime.datetime(2015, 1, 1, 12)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
         with raises(InvalidStartEndTimesError) as e_info:
-            profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+            profiler = FepsTimeProfiler(s, e,
                 fire_type=FireType.RX)
         # TODO: check e_info.valeu.args[0]
 
     def test_ignition_start_after_end(self):
         s = datetime.datetime(2015, 1, 1, 0)
         e = datetime.datetime(2015, 1, 1, 12)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
         ig_s = datetime.datetime(2015, 1, 1, 12)
         ig_e = datetime.datetime(2015, 1, 1, 9)
         with raises(InvalidStartEndTimesError) as e_info:
-            profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+            profiler = FepsTimeProfiler(s, e,
                 local_ignition_start_time=ig_s,
                 local_ignition_end_time=ig_e,
                 fire_type=FireType.RX)
@@ -113,13 +104,10 @@ class TestFepsTimeProfiler_Rx(object):
     def test_ignition_start_same_as_end(self):
         s = datetime.datetime(2015, 1, 1, 0)
         e = datetime.datetime(2015, 1, 1, 12)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
         ig_s = datetime.datetime(2015, 1, 1, 12)
         ig_e = datetime.datetime(2015, 1, 1, 12)
         with raises(InvalidStartEndTimesError) as e_info:
-            profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+            profiler = FepsTimeProfiler(s, e,
                 local_ignition_start_time=ig_s,
                 local_ignition_end_time=ig_e,
                 fire_type=FireType.RX)
@@ -131,10 +119,7 @@ class TestFepsTimeProfiler_Rx(object):
     def test_9am_to_12pm_no_ig_times(self):
         s = datetime.datetime(2015, 1, 1, 9)
         e = datetime.datetime(2015, 1, 1, 12)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             fire_type=FireType.RX)
 
         # TODO: check times
@@ -143,10 +128,7 @@ class TestFepsTimeProfiler_Rx(object):
     def test_930am_to_12pm_no_ig_times(self):
         s = datetime.datetime(2015, 1, 1, 9, 30)
         e = datetime.datetime(2015, 1, 1, 12)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             fire_type=FireType.RX)
 
         # TODO: check times
@@ -155,10 +137,7 @@ class TestFepsTimeProfiler_Rx(object):
     def test_12am_to_12am_no_ig_times(self):
         s = datetime.datetime(2015, 1, 1, 0)
         e = datetime.datetime(2015, 1, 2, 0)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             fire_type=FireType.RX)
 
         # TODO: check times
@@ -167,10 +146,7 @@ class TestFepsTimeProfiler_Rx(object):
     def test_12am_to_1030am_no_ig_times(self):
         s = datetime.datetime(2015, 1, 1, 0)
         e = datetime.datetime(2015, 1, 1, 10, 30)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             fire_type=FireType.RX)
 
         # TODO: check times
@@ -179,10 +155,7 @@ class TestFepsTimeProfiler_Rx(object):
     def test_two_days_12am_to_12am_no_ig_times(self):
         s = datetime.datetime(2015, 1, 1, 0)
         e = datetime.datetime(2015, 1, 3, 0)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             fire_type=FireType.RX)
 
         # TODO: check times
@@ -191,10 +164,7 @@ class TestFepsTimeProfiler_Rx(object):
     def test_12pm_to_12am_no_ig_times(self):
         s = datetime.datetime(2015, 1, 1, 12)
         e = datetime.datetime(2015, 1, 2, 0)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             fire_type=FireType.RX)
 
         # TODO: check times
@@ -203,10 +173,7 @@ class TestFepsTimeProfiler_Rx(object):
     def test_12pm_to_12pm_no_ig_times(self):
         s = datetime.datetime(2015, 1, 1, 12)
         e = datetime.datetime(2015, 1, 2, 12)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             fire_type=FireType.RX)
 
         # TODO: check times
@@ -218,12 +185,9 @@ class TestFepsTimeProfiler_Rx(object):
     def test_9am_to_12pm_same_ig_times(self):
         s = datetime.datetime(2015, 1, 1, 9)
         e = datetime.datetime(2015, 1, 1, 12)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
         ig_s = datetime.datetime(2015, 1, 1, 9)
         ig_e = datetime.datetime(2015, 1, 1, 12)
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             local_ignition_start_time=ig_s,
             local_ignition_end_time=ig_e,
             fire_type=FireType.RX)
@@ -234,12 +198,9 @@ class TestFepsTimeProfiler_Rx(object):
     def test_12am_to_12am_ig_10am_to_2pm(self):
         s = datetime.datetime(2015, 1, 1, 0)
         e = datetime.datetime(2015, 1, 2, 0)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
         ig_s = datetime.datetime(2015, 1, 1, 10)
         ig_e = datetime.datetime(2015, 1, 1, 14)
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             local_ignition_start_time=ig_s,
             local_ignition_end_time=ig_e,
             fire_type=FireType.RX)
@@ -251,12 +212,9 @@ class TestFepsTimeProfiler_Rx(object):
     def test_two_days_12am_to_12am_ig_10am_to_2pm(self):
         s = datetime.datetime(2015, 1, 1, 0)
         e = datetime.datetime(2015, 1, 3, 0)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
         ig_s = datetime.datetime(2015, 1, 1, 10)
         ig_e = datetime.datetime(2015, 1, 1, 14)
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             local_ignition_start_time=ig_s,
             local_ignition_end_time=ig_e,
             fire_type=FireType.RX)
@@ -267,12 +225,9 @@ class TestFepsTimeProfiler_Rx(object):
     def test_two_days_1230am_to_12am_ig_1030am_to_2pm(self):
         s = datetime.datetime(2015, 1, 1, 0, 30)
         e = datetime.datetime(2015, 1, 3, 0)
-        dfl = 2
-        tagc = 10
-        tbgc = 1
         ig_s = datetime.datetime(2015, 1, 1, 10)
         ig_e = datetime.datetime(2015, 1, 1, 14)
-        profiler = FepsTimeProfiler(s, e, dfl, tagc, tbgc,
+        profiler = FepsTimeProfiler(s, e,
             local_ignition_start_time=ig_s,
             local_ignition_end_time=ig_e,
             fire_type=FireType.RX)
