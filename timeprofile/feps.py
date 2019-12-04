@@ -22,11 +22,6 @@ Notes on modifications made to the equstions in Anderson et. al.:
    It's up to the user to specify a large enough activity window to avoid
    cutting off a significant portion of the graph (e.g. midnight to midnight
    for a 9am-12pm ignition).
-
-
-TODO: Refactor FepsTimeProfiler to optionally accept as input all fields
-  (total consumption, duff consumption, hourly relative humidity, etc)
-  mentioned in the equations in Anderson et. al.
 """
 
 import datetime
@@ -131,7 +126,6 @@ class FepsTimeProfiler(BaseTimeProfiler):
         "wind_speed": 5,
         "duff_moisture_content": M_DBM
     }
-
 
     # TODO: do we need fire_type?  can be inferred as rx if ignition times
     #   are defined
@@ -285,7 +279,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
         self._c_sts = min(self._c_f, self._total_consumption - self._c_f)
 
     def _compute_smoldering_adjustment(self):
-        # TODO: refactor class to input hourly relative humitidy?
+        # TODO: refactor class to input hourly relative humidity?
         self._smoldering_adjustment = (
             math.floor(math.pow((self._wind_speed / self.U_b), 0.5))
             * ((100 / self._relative_humidity) / self.RH_b))
@@ -355,8 +349,6 @@ class FepsTimeProfiler(BaseTimeProfiler):
             "smoldering": self._normalize(self._compute_short_term_smoldering()),
             "residual": self._normalize(self._compute_long_term_smoldering())
         }
-
-        # TODO: normalize to make sure each set adds up to one
 
     def _normalize(self, fractions):
         total = sum(fractions)
