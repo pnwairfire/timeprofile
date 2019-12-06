@@ -190,6 +190,11 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
     ## Initialization
 
+    def _validate_ignition_time(self, t, start, end, identifier):
+        if t and (t < start or t > end):
+            raise ValueError(("Ignition {} time - {} - isn't within start "
+                "/ end times - {} / {}").format(identifier, t, start, end))
+
     def _set_times(self, start, end, ig_start, ig_end):
         # Makes sure start < end
         self._validate_start_end_times(start, end)
@@ -198,6 +203,9 @@ class FepsTimeProfiler(BaseTimeProfiler):
 
         # TODO: should auto-setting of self._ig_start and self._ig_end
         #  be different for WF vs Rx?
+
+        self._validate_ignition_time(ig_start, start, end, "start")
+        self._validate_ignition_time(ig_end, start, end, "end")
 
         # fill in local_ignition_start_time and/or local_ignition_end_time
         # if necessary
