@@ -63,9 +63,9 @@ First, install pip (with sudo if necessary):
     apt-get install python-pip
     pip install --upgrade pip
 
-Then, to install, for example, v1.1.1, use the following (with sudo if necessary):
+Then, to install, for example, v1.1.2, use the following (with sudo if necessary):
 
-    pip install --extra-index https://pypi.airfire.org/simple timeprofile==1.1.1
+    pip install --extra-index https://pypi.airfire.org/simple timeprofile==1.1.2
 
 If you get an error like
 
