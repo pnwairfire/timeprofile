@@ -318,7 +318,7 @@ class FepsTimeProfiler(BaseTimeProfiler):
         cumulative_area = []
         total_ig_seconds = (self._ig_end - self._ig_start).total_seconds()
         hr = datetime.datetime(self._start.year, self._start.month,
-            self._start.day)
+            self._start.day, self._start.hour)
         final_hr = self._end.date()
         cumulative_seconds = 0
         while hr < self._end:
