@@ -28,7 +28,7 @@ setup(
     url='https://github.com/pnwairfire/timeprofile',
     description='Package for time profiling emissions output.',
     install_requires=[
-        "nested_dict"
+        "nested_dict==1.61"
     ],
     dependency_links=[
     ],
