@@ -2,7 +2,7 @@ __author__      = "Joel Dubowy"
 
 import datetime
 
-from py.test import raises
+from pytest import raises
 
 from timeprofile import (
     BaseTimeProfiler,

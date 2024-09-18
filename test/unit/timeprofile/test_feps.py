@@ -4,7 +4,7 @@ __author__      = "Joel Dubowy"
 import datetime
 
 from numpy.testing import assert_approx_equal
-from py.test import raises
+from pytest import raises
 
 from timeprofile.feps import (
     MoistureCategory,
